@@ -2,63 +2,90 @@ package repository
 
 import (
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
-	"github.com/go-co-op/gocron/v2"
+	"github.com/go-git/go-git/v5"
+	"github.com/gofiber/storage/memory/v2"
 	"github.com/rs/zerolog"
 	"github.com/valerius21/gitignore.lol/pkg/utils"
 )
 
+func init() {
+	logger := utils.InitLogger()
+	store := memory.New()
+
+	DefaultRepository = Repository{
+		logger: &logger,
+		store:  store,
+	}
+
+	DefaultRepository.UpdateRepo()
+}
+
 type Repository struct {
 	logger *zerolog.Logger
+	store  *memory.Storage
 }
 
-func (r *Repository) InitRepoWatch() (*gocron.Scheduler, error) {
-	// init logging
-	logger := utils.InitLogger()
-	r.logger = &logger
+var DefaultRepository Repository
 
-	scheduler, err := gocron.NewScheduler()
+// updateRepo clones the repo and updates the local copy
+func (rr *Repository) UpdateRepo() {
+	// check against cache
+	cacheHit, err := rr.store.Get("repo")
 	if err != nil {
-		return nil, err
+		rr.logger.Fatal().Err(err).Msg("failed to check cache")
+		return
 	}
 
-	job, err := scheduler.NewJob(
-		gocron.DurationJob(
-			10*time.Second,
-		),
-		gocron.NewTask(
-			func(a string) {
-				r.logger.Info().Msg(a)
-			},
-			"hello",
-		),
-	)
-	if err != nil {
-		return nil, err
+	if cacheHit != nil {
+		rr.logger.Debug().Msg("cache hit")
+		return
 	}
+	rr.logger.Debug().Msg("cache miss")
+	info := utils.DefaultRepoInfo
+	byteArr := []byte("fetched")
+	rr.store.Set("repo", byteArr, 10*time.Minute)
 
-	// Setup signal handling
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	// if the repo already exists, pull the latest changes
+	fileInfo, err := os.Stat(info.LocalPath)
 
-	// Goroutine to handle shutdown
-	go func() {
-		<-sigChan
-		r.logger.Info().Msg("Shutting down scheduler...")
-		scheduler.Shutdown()
-		r.logger.Info().Msg("Scheduler shut down")
-		close(sigChan)
-	}()
+	if err == nil && fileInfo.IsDir() {
+		rr.logger.Debug().Msg("repo exists")
+		r, err := git.PlainOpen(info.LocalPath)
+		if err != nil {
+			rr.logger.Fatal().Err(err).Msg("failed to open repo")
+			return
+		}
 
-	r.logger.Info().Msgf("Job ID: %v", job.ID())
+		w, err := r.Worktree()
+		if err != nil {
+			rr.logger.Fatal().Err(err).Msg("failed to get worktree")
+			return
+		}
 
-	return &scheduler, nil
-}
+		rr.logger.Debug().Msg("pulling repo")
+		err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+		if err != nil {
+			rr.logger.Fatal().Err(err).Msg("failed to pull repo")
+			return
+		}
+		rr.logger.Debug().Msg("repo pulled")
+	} else if os.IsNotExist(err) {
+		// otherwise, clone the repo
+		rr.logger.Debug().Msg("cloning repo")
+		_, err = git.PlainClone(info.LocalPath, false, &git.CloneOptions{
+			URL:   info.URL,
+			Depth: 1,
+		})
 
-func (r *Repository) Close(s *gocron.Scheduler) {
-	r.logger.Info().Msgf("Shutting down scheduler")
-	(*s).Shutdown()
+		if err != nil {
+			rr.logger.Fatal().Err(err).Msg("failed to clone repo")
+			return
+		}
+		rr.logger.Debug().Msg("repo cloned")
+	} else {
+		rr.logger.Fatal().Err(err).Msg("failed to check if repo exists")
+		return
+	}
 }
