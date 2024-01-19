@@ -33,6 +33,8 @@ require (
 	github.com/gofiber/contrib/fiberzerolog v0.2.3 // indirect
 	github.com/gofiber/fiber/v2 v2.52.0 // indirect
 	github.com/gofiber/storage/memory/v2 v2.0.0
+	github.com/gofiber/utils v1.1.0
+	github.com/gofiber/utils/v2 v2.0.0-beta.3
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect

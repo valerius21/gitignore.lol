@@ -2,18 +2,13 @@ package main
 
 import (
 	"github.com/valerius21/gitignore.lol/pkg/repository"
-	"github.com/valerius21/gitignore.lol/pkg/utils"
+	"github.com/valerius21/gitignore.lol/pkg/web"
 )
 
 func main() {
 	// init logging
-	logger := utils.InitLogger()
-	repo := new(repository.Repository)
+	_ = repository.DefaultRepository
+	ws := web.DefaultWebServer
 
-	// start repo watch
-	sRef, err := repo.InitRepoWatch()
-	if err != nil {
-		panic(err)
-	}
-
+	ws.App.Listen(":3000")
 }

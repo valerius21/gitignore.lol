@@ -31,10 +31,12 @@ type Repository struct {
 
 var DefaultRepository Repository
 
+const repoKey = "repo"
+
 // updateRepo clones the repo and updates the local copy
 func (rr *Repository) UpdateRepo() {
 	// check against cache
-	cacheHit, err := rr.store.Get("repo")
+	cacheHit, err := rr.store.Get(repoKey)
 	if err != nil {
 		rr.logger.Fatal().Err(err).Msg("failed to check cache")
 		return
@@ -46,9 +48,9 @@ func (rr *Repository) UpdateRepo() {
 	}
 	rr.logger.Debug().Msg("cache miss")
 	info := utils.DefaultRepoInfo
-	byteArr := []byte("fetched")
 	rr.store.Reset()
-	rr.store.Set("repo", byteArr, 10*time.Minute)
+
+	rr.store.Set(repoKey, []byte("fetched"), 10*time.Minute)
 
 	// if the repo already exists, pull the latest changes
 	fileInfo, err := os.Stat(info.LocalPath)
@@ -129,6 +131,13 @@ func (rr *Repository) GetMappedFileName(language string) (string, error) {
 		rr.logger.Debug().Msg("Found .gitignore files:")
 		for _, file := range gitignoreFiles {
 			rr.logger.Debug().Msg(file)
+			fileContents, err := os.ReadFile(file)
+			if err != nil {
+				rr.logger.Err(err).Msgf("failed to read file %s", file)
+				return "", err
+			}
+			rr.store.Set(file, fileContents, 5*time.Minute)
+			rr.logger.Debug().Msgf("Added file %s to cache: Size = %d", file, len(fileContents))
 		}
 	}
 
@@ -140,7 +149,7 @@ func (rr *Repository) GetMappedFileName(language string) (string, error) {
 	for _, file := range gitignoreFiles {
 		fileName := strings.TrimSuffix(filepath.Base(file), ".gitignore")
 		lowerFileName := strings.ToLower(fileName)
-		mapping[lowerFileName] = fileName
+		mapping[lowerFileName] = file
 	}
 
 	// add the mappings to the store
@@ -150,10 +159,43 @@ func (rr *Repository) GetMappedFileName(language string) (string, error) {
 
 	// check if the language is in the store
 	if value, err := rr.store.Get(lowerLanguage); err == nil {
-		rr.logger.Debug().Msgf("Found mapping for %s: %s", lowerLanguage, value)
+		rr.logger.Debug().Msgf("Found file name mapping for %s: %s", lowerLanguage, value)
 		return string(value), nil
 	} else {
-		rr.logger.Debug().Msgf("No mapping found for %s", lowerLanguage)
+		rr.logger.Debug().Msgf("No file name mapping found for %s", lowerLanguage)
 		return "", err
+	}
+}
+
+// GetFileContent returns the content of the file with the given name
+func (rr *Repository) GetFileContent(fileName, language string) ([]byte, error) {
+	// check against cache
+	cacheHit, err := rr.store.Get(fileName)
+	if err != nil {
+		rr.logger.Fatal().Err(err).Msg("failed to check cache")
+		return nil, err
+	}
+
+	if cacheHit != nil {
+		rr.logger.Debug().Msg("cache hit")
+		return cacheHit, nil
+	}
+
+	rr.logger.Debug().Msg("cache miss")
+
+	_, err = rr.GetMappedFileName(language)
+
+	if err != nil {
+		rr.logger.Err(err).Msg("failed to get mapped file name")
+		return nil, err
+	}
+
+	// check if the file is in the store
+	if value, err := rr.store.Get(fileName); err == nil {
+		rr.logger.Debug().Msgf("Found file contents for %s", fileName)
+		return value, nil
+	} else {
+		rr.logger.Debug().Msgf("No file contents found for %s", fileName)
+		return nil, err
 	}
 }

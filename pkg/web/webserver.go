@@ -8,6 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	gfUtils "github.com/gofiber/utils/v2"
+	"github.com/valerius21/gitignore.lol/pkg/repository"
 	"github.com/valerius21/gitignore.lol/pkg/utils"
 )
 
@@ -15,9 +17,14 @@ type WebServer struct {
 	App *fiber.App
 }
 
-func (ws *WebServer) Init() {
+var DefaultWebServer WebServer
+
+func init() {
 	// Intianciate Fiber
 	app := fiber.New()
+
+	// init repo
+	repo := repository.DefaultRepository
 
 	// init logging
 	logger := utils.InitLogger()
@@ -33,23 +40,49 @@ func (ws *WebServer) Init() {
 		LimiterMiddleware: limiter.SlidingWindow{},
 	}))
 
-	// TODO: Set up cache
-	// server-side caching
 	// client-side caching
 	app.Use(cache.New())
 
 	// Healthcheck endpoint
 	app.Use(healthcheck.New())
 
-	// Download Repository
-
 	// static files sharing
-	app.Static("/", "/tmp/gitignore")
+	app.Static("/", utils.DefaultRepoInfo.LocalPath)
 
 	// Handlers
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("")
+		return c.SendString("Hello there")
 	})
 
-	ws.App = app
+	app.Get("/:template", func(c *fiber.Ctx) error {
+		result := gfUtils.CopyString(c.Params("template"))
+
+		logger.Debug().Str("template", result).Msg("got template: " + result)
+		repo.UpdateRepo()
+		fileName, err := repo.GetMappedFileName(result)
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to get mapped file name")
+			return c.SendStatus(500)
+		}
+
+		// read file contents from fileName
+		fileContents, err := repo.GetFileContent(fileName, result)
+
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to get file contents")
+			return c.SendStatus(500)
+		}
+
+		content := string(fileContents)
+
+		if content == "" {
+			return c.SendStatus(404)
+		}
+
+		return c.SendString(content)
+	})
+
+	DefaultWebServer = WebServer{
+		App: app,
+	}
 }
