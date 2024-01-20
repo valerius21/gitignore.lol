@@ -68,7 +68,7 @@ func init() {
 
 		if resp != nil {
 			logger.Debug().Msg("cache hit")
-			return c.Send(resp)
+			return c.JSON(resp)
 		}
 
 		logger.Debug().Msg("cache miss")
