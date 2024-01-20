@@ -68,7 +68,9 @@ func init() {
 
 		if resp != nil {
 			logger.Debug().Msg("cache hit")
-			return c.JSON(resp)
+			var rr map[string]interface{}
+			json.Unmarshal(resp, &rr)
+			return c.JSON(rr)
 		}
 
 		logger.Debug().Msg("cache miss")
