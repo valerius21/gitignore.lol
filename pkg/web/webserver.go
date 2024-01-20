@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/storage/memory/v2"
 	gfUtils "github.com/gofiber/utils/v2"
 	"github.com/valerius21/gitignore.lol/pkg/repository"
 	"github.com/valerius21/gitignore.lol/pkg/utils"
@@ -21,6 +23,8 @@ type WebServer struct {
 
 var DefaultWebServer WebServer
 
+const availableFilesKey = "availableFiles"
+
 func init() {
 	// Intianciate Fiber
 	app := fiber.New()
@@ -30,6 +34,9 @@ func init() {
 
 	// init logging
 	logger := utils.InitLogger()
+
+	// init store for caching
+	store := memory.New()
 
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: &logger,
@@ -53,6 +60,19 @@ func init() {
 
 	// Handlers
 	app.Get("/", func(c *fiber.Ctx) error {
+		resp, err := store.Get(availableFilesKey)
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to get cache")
+			return c.SendStatus(500)
+		}
+
+		if resp != nil {
+			logger.Debug().Msg("cache hit")
+			return c.Send(resp)
+		}
+
+		logger.Debug().Msg("cache miss")
+
 		files, err := repo.GetAvailabeIgnoreFiles()
 		if err != nil {
 			logger.Error().Err(err).Msg("failed to get available files")
@@ -72,6 +92,21 @@ func init() {
 		}
 
 		message["templates"] = renamed
+
+		// cache the response
+		respBytes, err := json.Marshal(message)
+
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to marshal response")
+			return c.SendStatus(500)
+		}
+
+		err = store.Set(availableFilesKey, respBytes, 0)
+
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to set cache")
+			return c.SendStatus(500)
+		}
 
 		return c.JSON(message)
 	})
