@@ -1,6 +1,8 @@
 package web
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gofiber/contrib/fiberzerolog"
@@ -51,32 +53,77 @@ func init() {
 
 	// Handlers
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello there")
+		files, err := repo.GetAvailabeIgnoreFiles()
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to get available files")
+			return c.SendStatus(500)
+		}
+
+		message := make(map[string]interface{})
+
+		message["message"] = "Welcome to gitignore.lol. Here are the available templates. " +
+			"This endpoint may change in the future." +
+			"You can use them by appending them to the URL. Example: https://gitignore.lol/go,node,python"
+
+		// rename the files to lowercase
+		renamed := make([]string, 0)
+		for _, file := range files {
+			renamed = append(renamed, strings.ToLower(file))
+		}
+
+		message["templates"] = renamed
+
+		return c.JSON(message)
 	})
 
 	app.Get("/:template", func(c *fiber.Ctx) error {
 		result := gfUtils.CopyString(c.Params("template"))
-
 		logger.Debug().Str("template", result).Msg("got template: " + result)
+
+		// sanitize the result
+		result = strings.ReplaceAll(result, " ", ",")
+
+		// split the result by comma
+		templates := make([]string, 0)
+		if strings.Contains(result, ",") {
+			templates = strings.Split(result, ",")
+		} else {
+			templates = append(templates, result)
+		}
+
 		repo.UpdateRepo()
-		fileName, err := repo.GetMappedFileName(result)
-		if err != nil {
-			logger.Error().Err(err).Msg("failed to get mapped file name")
-			return c.SendStatus(500)
+
+		ignores := make(map[string]string)
+
+		for _, result := range templates {
+			fileName, err := repo.GetMappedFileName(result)
+			if err != nil {
+				logger.Error().Err(err).Msg("failed to get mapped file name")
+				return c.SendStatus(500)
+			}
+
+			// read file contents from fileName
+			fileContents, err := repo.GetFileContent(fileName, result)
+
+			if err != nil {
+				logger.Error().Err(err).Msg("failed to get file contents")
+				return c.SendStatus(500)
+			}
+
+			content := string(fileContents)
+
+			if content == "" {
+				return c.SendStatus(404)
+			}
+
+			ignores[result] = content
 		}
 
-		// read file contents from fileName
-		fileContents, err := repo.GetFileContent(fileName, result)
-
-		if err != nil {
-			logger.Error().Err(err).Msg("failed to get file contents")
-			return c.SendStatus(500)
-		}
-
-		content := string(fileContents)
-
-		if content == "" {
-			return c.SendStatus(404)
+		// combine the contents of the files
+		content := fmt.Sprintf("# ++++ gitignore.io/%s ++++\n", result)
+		for key, value := range ignores {
+			content += fmt.Sprintf("# ==== %s ====\n", strings.ReplaceAll(key, "# ", ""))
+			content += value
 		}
 
 		return c.SendString(content)

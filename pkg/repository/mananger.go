@@ -199,3 +199,33 @@ func (rr *Repository) GetFileContent(fileName, language string) ([]byte, error) 
 		return nil, err
 	}
 }
+
+func (rr *Repository) GetAvailabeIgnoreFiles() ([]string, error) {
+	info := utils.DefaultRepoInfo
+	// find all .gitignore files in the repo
+	var gitignoreFiles []string // slice to hold matching filenames
+
+	err := filepath.Walk(info.LocalPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".gitignore") {
+			gitignoreFiles = append(gitignoreFiles, path)
+		}
+		return nil
+	})
+
+	endpointParams := make([]string, 0)
+	if err != nil {
+		rr.logger.Err(err).Msgf("error walking the path %v\n", info.LocalPath)
+		return nil, err
+	} else {
+		rr.logger.Debug().Msg("Found .gitignore files:")
+		for _, file := range gitignoreFiles {
+			fileName := strings.TrimSuffix(filepath.Base(file), ".gitignore")
+			endpointParams = append(endpointParams, fileName)
+		}
+	}
+
+	return endpointParams, nil
+}
