@@ -7,7 +7,6 @@ import (
 )
 
 func Run(port int) error {
-
 	app := fiber.New()
 
 	app.Get("/", func(c *fiber.Ctx) error {

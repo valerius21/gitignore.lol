@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/alecthomas/kong"
+
 	"me.valerius/gitignore-lol/pkg/lib"
 	"me.valerius/gitignore-lol/pkg/server"
 )
