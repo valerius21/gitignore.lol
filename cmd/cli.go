@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/alecthomas/kong"
 	"me.valerius/gitignore-lol/pkg/lib"
@@ -9,9 +9,11 @@ import (
 )
 
 func main() {
-	// TODO: read cli flags, port, base-repo, etc
-	ctx := kong.Parse(&lib.CLI)
-	fmt.Println(ctx.Command())
-	// TODO: startup function
-	server.Run(3000)
+	// Parse command line flags
+	_ = kong.Parse(&lib.CLI)
+
+	// Start the server with the configured port
+	if err := server.Run(lib.CLI.Port); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
