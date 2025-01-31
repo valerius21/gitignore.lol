@@ -20,22 +20,7 @@ func New(origin, path string, fetchInterval int) *GitRunner {
 	}
 }
 
-// Init checks, if the local repository exists, if not clones it.
-// If it does exist, it updates it.
-func (gr *GitRunner) Init() error {
-	// Check if directory exists, if not clone the repo
-	if _, err := os.Stat(gr.localPath); os.IsNotExist(err) {
-		// TODO: log
-		_, err = git.PlainClone(gr.localPath, false, &git.CloneOptions{
-			URL: gr.origin,
-		})
-
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
+func (gr *GitRunner) updateRepo() error {
 	// update repo
 
 	repo, err := git.PlainOpen(gr.localPath)
@@ -62,4 +47,19 @@ func (gr *GitRunner) Init() error {
 	// TODO: log ref
 
 	return nil
+}
+
+// Init checks, if the local repository exists, if not clones it.
+// If it does exist, it updates it.
+func (gr *GitRunner) Init() error {
+	// Check if directory exists, if not clone the repo
+	if _, err := os.Stat(gr.localPath); os.IsNotExist(err) {
+		// TODO: log
+		_, err = git.PlainClone(gr.localPath, false, &git.CloneOptions{
+			URL: gr.origin,
+		})
+		return err
+	}
+
+	return gr.updateRepo()
 }
