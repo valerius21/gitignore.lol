@@ -68,10 +68,10 @@ func (gr *GitRunner) updateRepo() error {
 }
 
 func (gr *GitRunner) ListFiles() ([]string, error) {
-files, err := filepath.Glob(filepath.Join(gr.LocalPath, "*.gitignore"))
-		if err != nil {
-			return nil, err
-		}
+	files, err := filepath.Glob(filepath.Join(gr.LocalPath, "*.gitignore"))
+	if err != nil {
+		return nil, err
+	}
 
 	fileNames := make([]string, len(files))
 	for i, file := range files {
@@ -83,4 +83,3 @@ files, err := filepath.Glob(filepath.Join(gr.LocalPath, "*.gitignore"))
 	uniqueFiles = RemoveDuplicates(uniqueFiles)
 	return uniqueFiles, nil
 }
-

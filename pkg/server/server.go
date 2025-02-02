@@ -17,6 +17,10 @@ func Run(port int, gitRunner *lib.GitRunner) error {
 		return c.SendString("Hello, world")
 	})
 
+	app.Get("/api/healthz", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
 	app.Get("/api/list", func(c *fiber.Ctx) error {
 		fileNames, err := gitRunner.ListFiles()
 		if err != nil {
