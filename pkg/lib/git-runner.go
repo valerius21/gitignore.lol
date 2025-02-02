@@ -2,20 +2,22 @@ package lib
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 )
 
 type GitRunner struct {
 	origin        string
-	localPath     string
+	LocalPath     string
 	fetchInterval int
 }
 
-func New(origin, path string, fetchInterval int) *GitRunner {
+func NewGitRunner(origin, path string, fetchInterval int) *GitRunner {
 	return &GitRunner{
 		origin:        origin,
-		localPath:     path,
+		LocalPath:     path,
 		fetchInterval: fetchInterval,
 	}
 }
@@ -24,21 +26,22 @@ func New(origin, path string, fetchInterval int) *GitRunner {
 // If it does exist, it updates it.
 func (gr *GitRunner) Init() error {
 	// Check if directory exists, if not clone the repo
-	if _, err := os.Stat(gr.localPath); os.IsNotExist(err) {
-		// TODO: log
-		_, err = git.PlainClone(gr.localPath, false, &git.CloneOptions{
+	if _, err := os.Stat(gr.LocalPath); os.IsNotExist(err) {
+		Logger.Info("Cloning", "origin", gr.origin, "path", gr.LocalPath)
+		_, err = git.PlainClone(gr.LocalPath, false, &git.CloneOptions{
 			URL: gr.origin,
 		})
 		return err
 	}
 
+	Logger.Info("Update", "origin", gr.origin)
 	return gr.updateRepo()
 }
 
 func (gr *GitRunner) updateRepo() error {
 	// update repo
 
-	repo, err := git.PlainOpen(gr.localPath)
+	repo, err := git.PlainOpen(gr.LocalPath)
 	if err != nil {
 		return err
 	}
@@ -49,17 +52,35 @@ func (gr *GitRunner) updateRepo() error {
 	}
 
 	err = wt.Pull(&git.PullOptions{RemoteName: "origin"})
-	if err != nil {
+	if err != nil && err != git.NoErrAlreadyUpToDate {
 		return err
 	}
 
 	// log latest commit hash that was pulled
-	_, err = repo.Head()
+	ref, err := repo.Head()
 	if err != nil {
 		return err
 	}
 
-	// TODO: log ref
+	Logger.Info("Ref", "hash", ref.Hash().String())
 
 	return nil
 }
+
+func (gr *GitRunner) ListFiles() ([]string, error) {
+files, err := filepath.Glob(filepath.Join(gr.LocalPath, "*.gitignore"))
+		if err != nil {
+			return nil, err
+		}
+
+	fileNames := make([]string, len(files))
+	for i, file := range files {
+		fileNames[i] = strings.ToLower(filepath.Base(file))
+		fileNames[i] = strings.ReplaceAll(fileNames[i], ".gitignore", "")
+	}
+
+	uniqueFiles := RemoveEmptyString(fileNames)
+	uniqueFiles = RemoveDuplicates(uniqueFiles)
+	return uniqueFiles, nil
+}
+
