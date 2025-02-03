@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +13,7 @@ type GitRunner struct {
 	origin        string
 	LocalPath     string
 	fetchInterval int
+	langPaths     map[string]string
 }
 
 func NewGitRunner(origin, path string, fetchInterval int) *GitRunner {
@@ -19,6 +21,7 @@ func NewGitRunner(origin, path string, fetchInterval int) *GitRunner {
 		origin:        origin,
 		LocalPath:     path,
 		fetchInterval: fetchInterval,
+		langPaths:     make(map[string]string),
 	}
 }
 
@@ -77,9 +80,40 @@ func (gr *GitRunner) ListFiles() ([]string, error) {
 	for i, file := range files {
 		fileNames[i] = strings.ToLower(filepath.Base(file))
 		fileNames[i] = strings.ReplaceAll(fileNames[i], ".gitignore", "")
+		gr.langPaths[fileNames[i]] = file
 	}
 
 	uniqueFiles := RemoveEmptyString(fileNames)
 	uniqueFiles = RemoveDuplicates(uniqueFiles)
 	return uniqueFiles, nil
+}
+
+func (gr *GitRunner) indexFiles() error {
+	return nil
+}
+
+func (gr *GitRunner) GetFileContents(name string) (string, error) {
+	pattern := filepath.Join(gr.LocalPath, "**/*.gitignore")
+	files, err := filepath.Glob(pattern)
+	if err != nil {
+		return "", err
+	}
+	if len(files) == 0 {
+		return "", fmt.Errorf("no matches found for pattern: %s", pattern)
+	}
+
+	name = strings.ToLower(name)
+	for _, file := range files {
+		baseName := strings.ToLower(filepath.Base(file))
+		baseName = strings.ReplaceAll(baseName, ".gitignore", "")
+		if baseName == name {
+			content, err := os.ReadFile(file)
+			if err != nil {
+				return "", err
+			}
+			return string(content), nil
+		}
+	}
+
+	return "", fmt.Errorf("file not found: %s", name)
 }
