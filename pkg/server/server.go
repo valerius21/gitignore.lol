@@ -1,3 +1,19 @@
+//go:build !test
+// +build !test
+
+// @title           gitignore.lol API
+// @version         1.0
+// @description     A service to generate .gitignore files for your projects. An implementation insprired by the previously known gitignore.io.
+
+// @contact.name   Project URL
+// @contact.url    https://github.com/valerius21/gitignore.lol
+
+// @license.name  MIT
+// @license.url   https://github.com/valerius21/gitignore.lol/blob/main/LICENSE
+
+// @host      gitignore.lol
+// @BasePath  /
+// @schemes   https http
 package server
 
 import (
@@ -26,11 +42,29 @@ func Run(port int, gitRunner *lib.GitRunner) error {
 		return c.Redirect("/")
 	})
 
+	// @Summary Check if the serivce is healthy
+	// @Description returns 200, if the server is available
+	// @Tags healthcheck
+	// @Success 200 Service healthy
+	// @Router /api/healthz [get]
 	app.Get("/api/healthz", func(c *fiber.Ctx) error {
-		fmt.Println(web.LandingPageFiles)
 		return c.SendStatus(fiber.StatusOK)
 	})
 
+	// @Summary Get available templates
+	// @Description Returns a list of all available .gitignore templates
+	// @Tags templates
+	// @Accept json
+	// @Produce json
+	// @Success 200 {object} map[string]interface{} "List of available templates"
+	// @Failure 500 {object} string "Internal Server Error"
+	// @Router /api/list [get]
+	// List handles the root endpoint request.
+	// It returns a JSON response containing available .gitignore templates.
+	// The response is cached to improve performance.
+	// Responds:
+	//   - 200: JSON response with available templates
+	//   - 500: Internal server error if cache or repository operations fail
 	app.Get("/api/list", func(c *fiber.Ctx) error {
 		fileNames, err := gitRunner.ListFiles()
 		if err != nil {
@@ -42,6 +76,20 @@ func Run(port int, gitRunner *lib.GitRunner) error {
 		})
 	})
 
+	// @Summary Get gitignore templates
+	// @Description Returns combined .gitignore file for specified templates
+	// @Tags templates
+	// @Accept json
+	// @Produce text/plain
+	// @Param templateList path string true "Comma-separated list of templates (e.g., go,node,python)"
+	// @Success 200 {string} string "Combined .gitignore file content"
+	// @Failure 404 {string} string "Template not found"
+	// @Failure 500 {string} string "Internal Server Error"
+	// @Router /api/{templateList} [get]
+	// Templates handles the request for one or more .gitignore templates.
+	// It accepts a comma-separated list of template names in the URL parameter "templateList".
+	// The templates are fetched from the repository, combined, and returned as a single string.
+	// Example: /api/go,node,python will return a combined .gitignore file for Go, Node.js, and Python.
 	app.Get("/api/*", func(c *fiber.Ctx) error {
 		params := c.Params("*")
 		lib.Logger.Info(params)
