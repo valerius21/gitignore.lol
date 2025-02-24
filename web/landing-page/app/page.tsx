@@ -12,7 +12,7 @@ export default function Home() {
           gitignore.lol
         </Link>
         <nav className="flex items-center gap-4">
-          <Link href="#" className="text-gray-400 hover:text-white">
+          <Link href="/documentation" className="text-gray-400 hover:text-white">
             <Button size="sm">
               Documentation
             </Button>
@@ -23,7 +23,7 @@ export default function Home() {
             </Button>
           </Link>
           <Link
-            href="https://github.com"
+            href="https://github.com/valerius21/gitignore.lol"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white"

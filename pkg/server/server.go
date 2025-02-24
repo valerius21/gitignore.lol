@@ -22,6 +22,10 @@ func Run(port int, gitRunner *lib.GitRunner) error {
 		Browse:     true,
 	}))
 
+	app.Get("/documentation", func(c *fiber.Ctx) error {
+		return c.Redirect("/")
+	})
+
 	app.Get("/api/healthz", func(c *fiber.Ctx) error {
 		fmt.Println(web.LandingPageFiles)
 		return c.SendStatus(fiber.StatusOK)
