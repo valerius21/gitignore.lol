@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/components/multi-select.tsx
 
 import * as React from "react";

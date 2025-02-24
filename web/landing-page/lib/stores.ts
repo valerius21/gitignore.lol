@@ -1,3 +1,3 @@
 import { atom } from 'jotai'
-export const selectionAtom = atom<string[]>(['python', 'jupyternotebooks'])
+export const selectionAtom = atom<string[]>(['python', 'c++'])
 

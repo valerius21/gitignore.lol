@@ -8,23 +8,23 @@ import { useEffect, useState } from "react";
 
 export function SearchBox() {
   const [selection, setSelection] = useAtom(selectionAtom)
-  const { data, isLoading } = useQuery<{ templates: string[] }>({
+  const { data, isLoading } = useQuery<{ files: string[] }>({
     queryKey: ['ignore-list'],
-    queryFn: () => fetch('http://localhost:4444/api/list').then(res => res.json()),
+    queryFn: () => fetch('/api/list').then(res => res.json()),
     initialData: ({
-      templates: ['python', 'jupyternotebooks']
+      files: ['python', 'c++']
     })
   })
 
   return (
     <>
       <MultiSelect
-        options={data?.templates.map(s => ({
+        options={data?.files.map(s => ({
           label: s,
           value: s
         }))}
         onValueChange={setSelection}
-        defaultValue={data?.templates.slice(0, 3).map(s => s)}
+        defaultValue={data?.files.slice(0, 3).map(s => s)}
         placeholder="Select a template ..."
         variant={'inverted'}
         maxCount={100}
