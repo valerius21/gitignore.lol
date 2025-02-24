@@ -38,7 +38,14 @@ func (gr *GitRunner) Init() error {
 	}
 
 	Logger.Info("Update", "origin", gr.origin)
-	return gr.updateRepo()
+	err := gr.updateRepo()
+	if err != nil {
+		return err
+	}
+
+	// populate langPaths
+	_, err = gr.ListFiles()
+	return err
 }
 
 func (gr *GitRunner) updateRepo() error {
@@ -88,32 +95,17 @@ func (gr *GitRunner) ListFiles() ([]string, error) {
 	return uniqueFiles, nil
 }
 
-func (gr *GitRunner) indexFiles() error {
-	return nil
-}
-
 func (gr *GitRunner) GetFileContents(name string) (string, error) {
-	pattern := filepath.Join(gr.LocalPath, "**/*.gitignore")
-	files, err := filepath.Glob(pattern)
-	if err != nil {
-		return "", err
-	}
-	if len(files) == 0 {
-		return "", fmt.Errorf("no matches found for pattern: %s", pattern)
-	}
-
 	name = strings.ToLower(name)
-	for _, file := range files {
-		baseName := strings.ToLower(filepath.Base(file))
-		baseName = strings.ReplaceAll(baseName, ".gitignore", "")
-		if baseName == name {
-			content, err := os.ReadFile(file)
-			if err != nil {
-				return "", err
-			}
-			return string(content), nil
+
+	// Use the pre-populated langPaths map that was created in ListFiles()
+	if filePath, exists := gr.langPaths[name]; exists {
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			return "", fmt.Errorf("error reading file %s: %w", filePath, err)
 		}
+		return string(content), nil
 	}
 
-	return "", fmt.Errorf("file not found: %s", name)
+	return "", fmt.Errorf("gitignore file for '%s' not found", name)
 }

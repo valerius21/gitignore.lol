@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/alecthomas/kong"
 
 	"me.valerius/gitignore-lol/pkg/lib"
@@ -19,6 +21,8 @@ func main() {
 		lib.Logger.Error("Failed to initialize Git Repository", "error", err)
 		panic(1)
 	}
+
+	lib.Logger.Info(fmt.Sprintf("Gitignores cloned to %s\n", gr.LocalPath))
 
 	// Start the server with the configured port
 	if err := server.Run(lib.CLI.Port, gr); err != nil {
