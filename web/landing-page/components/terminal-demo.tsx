@@ -9,7 +9,7 @@ import { Button } from "./ui/button";
 export function TerminalDemo() {
   const choice = useAtomValue(selectionAtom)
   const [_, copyToClipboard] = useCopyToClipboard()
-  const apiUrl = `"gitignore.lol/api/${choice}" > .gitignore`
+  const apiUrl = `"https://gitignore.lol/api/${choice}" > .gitignore`
   return (
     <div className="relative w-full rounded-lg overflow-hidden bg-[#1C1C1C] shadow-2xl border border-gray-800">
       <div className="flex justify-between items-center px-4 py-2 bg-[#2D2D2D] border-b border-gray-800">
