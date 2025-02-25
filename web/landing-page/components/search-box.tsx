@@ -2,9 +2,7 @@
 import { MultiSelect } from "@/components/ui/multi-select";
 import { selectionAtom } from "@/lib/stores";
 import { useQuery } from "@tanstack/react-query";
-import { setMaxListeners } from "events";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
 
 export function SearchBox() {
   const [selection, setSelection] = useAtom(selectionAtom)
@@ -12,7 +10,7 @@ export function SearchBox() {
     queryKey: ['ignore-list'],
     queryFn: () => fetch('/api/list').then(res => res.json()),
     initialData: ({
-      files: ['python', 'c++']
+      files: ['python', 'c']
     })
   })
 

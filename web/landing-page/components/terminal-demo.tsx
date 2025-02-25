@@ -22,7 +22,7 @@ export function TerminalDemo() {
           <span className="text-gray-300">{apiUrl}</span>
         </div>
         <Button size='icon' variant={'ghost'} className="text-gray-400" onClick={() => {
-          copyToClipboard(`curl "${apiUrl}" > .gitignore`).then(() => {
+          copyToClipboard(`curl ${apiUrl}`).then(() => {
             toast.success('Copied to clipboard!')
           }).catch(() => {
             toast.error('Failed to copy to clipboard')
