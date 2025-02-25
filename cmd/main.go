@@ -1,3 +1,4 @@
+// Package main is the entry point for the gitignore.lol application
 package main
 
 import (
@@ -9,6 +10,8 @@ import (
 	"me.valerius/gitignore-lol/pkg/server"
 )
 
+// @Summary      Main entry point
+// @Description  Initializes the gitignore.lol application
 func main() {
 	// Parse command line flags
 	_ = kong.Parse(&lib.CLI)

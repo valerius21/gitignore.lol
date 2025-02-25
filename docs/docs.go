@@ -9,10 +9,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {
-            "name": "Project URL",
-            "url": "https://github.com/valerius21/gitignore.lol"
-        },
+        "contact": {},
         "license": {
             "name": "MIT",
             "url": "https://github.com/valerius21/gitignore.lol/blob/main/LICENSE"
@@ -25,28 +22,24 @@ const docTemplate = `{
         "/api/list": {
             "get": {
                 "description": "Returns a list of all available .gitignore templates",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "templates"
                 ],
-                "summary": "Get available templates",
+                "summary": "List available templates",
                 "responses": {
                     "200": {
                         "description": "List of available templates",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/pkg_server.TemplateResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/pkg_server.ErrorResponse"
                         }
                     }
                 }
@@ -55,9 +48,6 @@ const docTemplate = `{
         "/api/{templateList}": {
             "get": {
                 "description": "Returns combined .gitignore file for specified templates",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "text/plain"
                 ],
@@ -81,18 +71,47 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "404": {
+                    "400": {
                         "description": "Template not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/pkg_server.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/pkg_server.ErrorResponse"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "pkg_server.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Error message",
+                    "type": "string",
+                    "example": "Template not found"
+                }
+            }
+        },
+        "pkg_server.TemplateResponse": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "description": "List of available gitignore templates",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"go\"",
+                        "\"node\"",
+                        "\"python\"]"
+                    ]
                 }
             }
         }
@@ -102,11 +121,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "gitignore.lol",
+	Host:             "localhost:4444",
 	BasePath:         "/",
-	Schemes:          []string{"https", "http"},
+	Schemes:          []string{"http"},
 	Title:            "gitignore.lol API",
-	Description:      "A service to generate .gitignore files for your projects. An implementation insprired by the previously known gitignore.io.",
+	Description:      "A service to generate .gitignore files for your projects. An implementation inspired by the previously known gitignore.io.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

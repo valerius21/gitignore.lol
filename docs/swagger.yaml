@@ -1,11 +1,29 @@
 basePath: /
-host: gitignore.lol
+definitions:
+  pkg_server.ErrorResponse:
+    properties:
+      error:
+        description: Error message
+        example: Template not found
+        type: string
+    type: object
+  pkg_server.TemplateResponse:
+    properties:
+      files:
+        description: List of available gitignore templates
+        example:
+        - '["go"'
+        - '"node"'
+        - '"python"]'
+        items:
+          type: string
+        type: array
+    type: object
+host: localhost:4444
 info:
-  contact:
-    name: Project URL
-    url: https://github.com/valerius21/gitignore.lol
+  contact: {}
   description: A service to generate .gitignore files for your projects. An implementation
-    insprired by the previously known gitignore.io.
+    inspired by the previously known gitignore.io.
   license:
     name: MIT
     url: https://github.com/valerius21/gitignore.lol/blob/main/LICENSE
@@ -14,8 +32,6 @@ info:
 paths:
   /api/{templateList}:
     get:
-      consumes:
-      - application/json
       description: Returns combined .gitignore file for specified templates
       parameters:
       - description: Comma-separated list of templates (e.g., go,node,python)
@@ -30,21 +46,19 @@ paths:
           description: Combined .gitignore file content
           schema:
             type: string
-        "404":
+        "400":
           description: Template not found
           schema:
-            type: string
+            $ref: '#/definitions/pkg_server.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/pkg_server.ErrorResponse'
       summary: Get gitignore templates
       tags:
       - templates
   /api/list:
     get:
-      consumes:
-      - application/json
       description: Returns a list of all available .gitignore templates
       produces:
       - application/json
@@ -52,16 +66,14 @@ paths:
         "200":
           description: List of available templates
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/pkg_server.TemplateResponse'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            type: string
-      summary: Get available templates
+            $ref: '#/definitions/pkg_server.ErrorResponse'
+      summary: List available templates
       tags:
       - templates
 schemes:
-- https
 - http
 swagger: "2.0"
