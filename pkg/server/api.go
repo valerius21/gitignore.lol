@@ -18,7 +18,7 @@ import (
 
 // @host      gitignore.lol
 // @BasePath  /
-// @schemes   http
+// @schemes   http,https
 
 // ListTemplates godoc
 // @Summary      List available templates
