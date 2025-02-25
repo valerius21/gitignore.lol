@@ -14,7 +14,7 @@ $HOME/go/bin/swag init -g pkg/server/api.go --parseDependency --parseInternal
 # Check if generation was successful
 if [ $? -eq 0 ]; then
     echo "✅ Documentation generated successfully!"
-    echo "📚 View the documentation at http://localhost:4444/swagger/index.html when the server is running"
+    echo "📚 View the documentation at http://gitignore.lol/swagger/index.html when the server is running"
 else
     echo "❌ Failed to generate documentation"
     exit 1

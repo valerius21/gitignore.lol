@@ -16,7 +16,7 @@ import (
 // @license.name  MIT
 // @license.url   https://github.com/valerius21/gitignore.lol/blob/main/LICENSE
 
-// @host      localhost:4444
+// @host      gitignore.lol
 // @BasePath  /
 // @schemes   http
 
