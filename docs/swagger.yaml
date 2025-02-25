@@ -1,0 +1,67 @@
+basePath: /
+host: gitignore.lol
+info:
+  contact:
+    name: Project URL
+    url: https://github.com/valerius21/gitignore.lol
+  description: A service to generate .gitignore files for your projects. An implementation
+    insprired by the previously known gitignore.io.
+  license:
+    name: MIT
+    url: https://github.com/valerius21/gitignore.lol/blob/main/LICENSE
+  title: gitignore.lol API
+  version: "1.0"
+paths:
+  /api/{templateList}:
+    get:
+      consumes:
+      - application/json
+      description: Returns combined .gitignore file for specified templates
+      parameters:
+      - description: Comma-separated list of templates (e.g., go,node,python)
+        in: path
+        name: templateList
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Combined .gitignore file content
+          schema:
+            type: string
+        "404":
+          description: Template not found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get gitignore templates
+      tags:
+      - templates
+  /api/list:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all available .gitignore templates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of available templates
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get available templates
+      tags:
+      - templates
+schemes:
+- https
+- http
+swagger: "2.0"

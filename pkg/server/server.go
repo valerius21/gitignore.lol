@@ -23,7 +23,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/gofiber/swagger" // swagger handler
 
+	_ "me.valerius/gitignore-lol/docs"
 	lib "me.valerius/gitignore-lol/pkg/lib"
 	"me.valerius/gitignore-lol/web"
 )
@@ -41,6 +43,10 @@ func Run(port int, gitRunner *lib.GitRunner) error {
 	app.Get("/documentation", func(c *fiber.Ctx) error {
 		return c.Redirect("/")
 	})
+
+	app.Get("/swagger/*", swagger.New(swagger.Config{
+		URL: "/swagger/doc.json",
+	}))
 
 	// @Summary Check if the serivce is healthy
 	// @Description returns 200, if the server is available
