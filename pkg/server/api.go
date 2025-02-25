@@ -62,10 +62,15 @@ func getTemplates(c *fiber.Ctx, gitRunner *lib.GitRunner) error {
 	}
 	lib.Logger.Info(decodedParams)
 
-	var res strings.Builder
+	// Deduplicate parameters using a map
+	uniqueParams := make(map[string]struct{})
+	for _, name := range strings.Split(decodedParams, ",") {
+		uniqueParams[name] = struct{}{}
+	}
 
-	for i, name := range strings.Split(decodedParams, ",") {
-		lib.Logger.Info("Request", "n", i, "param", name)
+	var res strings.Builder
+	for name := range uniqueParams {
+		lib.Logger.Info("Request", "param", name)
 		content, err := gitRunner.GetFileContents(name)
 		if err != nil {
 			lib.Logger.Error("Param has no match", "param", name, "error", err)
