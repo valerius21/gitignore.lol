@@ -12,9 +12,9 @@ definitions:
       files:
         description: List of available gitignore templates
         example:
-          - '["go"'
-          - '"node"'
-          - '"python"]'
+        - '["go"'
+        - '"node"'
+        - '"python"]'
         items:
           type: string
         type: array
@@ -22,8 +22,7 @@ definitions:
 host: gitignore.lol
 info:
   contact: {}
-  description:
-    A service to generate .gitignore files for your projects. An implementation
+  description: A service to generate .gitignore files for your projects. An implementation
     inspired by the previously known gitignore.io.
   license:
     name: MIT
@@ -35,13 +34,13 @@ paths:
     get:
       description: Returns combined .gitignore file for specified templates
       parameters:
-        - description: Comma-separated list of templates (e.g., go,node,python)
-          in: path
-          name: templateList
-          required: true
-          type: string
+      - description: Comma-separated list of templates (e.g., go,node,python)
+        in: path
+        name: templateList
+        required: true
+        type: string
       produces:
-        - text/plain
+      - text/plain
       responses:
         "200":
           description: Combined .gitignore file content
@@ -50,31 +49,31 @@ paths:
         "400":
           description: Template not found
           schema:
-            $ref: "#/definitions/pkg_server.ErrorResponse"
+            $ref: '#/definitions/pkg_server.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: "#/definitions/pkg_server.ErrorResponse"
+            $ref: '#/definitions/pkg_server.ErrorResponse'
       summary: Get gitignore templates
       tags:
-        - templates
+      - templates
   /api/list:
     get:
       description: Returns a list of all available .gitignore templates
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: List of available templates
           schema:
-            $ref: "#/definitions/pkg_server.TemplateResponse"
+            $ref: '#/definitions/pkg_server.TemplateResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: "#/definitions/pkg_server.ErrorResponse"
+            $ref: '#/definitions/pkg_server.ErrorResponse'
       summary: List available templates
       tags:
-        - templates
+      - templates
 schemes:
-  - http
+- http,https
 swagger: "2.0"
