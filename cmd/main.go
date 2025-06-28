@@ -46,12 +46,54 @@ func main() {
 
 	lib.Logger.Info(fmt.Sprintf("Gitignores cloned to %s\n", gr.LocalPath))
 
+	// Initialize rate limiter if enabled
+	var rateLimiter *lib.MovingWindowLimiter
+	var enhancedLimiter *lib.EnhancedRateLimiter
+
+	if lib.CLI.EnableRateLimit {
+		if lib.CLI.UseEnhancedLimiter {
+			enhancedLimiter = lib.NewEnhancedRateLimiter(
+				lib.CLI.RateLimit,
+				lib.CLI.ErrorRateLimit,
+				lib.CLI.RateWindow,
+				lib.CLI.BlockMinutes,
+				lib.CLI.MaxViolations,
+				lib.CLI.RateCleanupMs,
+			)
+			lib.Logger.Info("Enhanced rate limiter initialized",
+				"normal_limit", lib.CLI.RateLimit,
+				"error_limit", lib.CLI.ErrorRateLimit,
+				"window_seconds", lib.CLI.RateWindow,
+				"block_minutes", lib.CLI.BlockMinutes,
+				"max_violations", lib.CLI.MaxViolations,
+				"cleanup_interval_ms", lib.CLI.RateCleanupMs)
+		} else {
+			rateLimiter = lib.NewMovingWindowLimiter(
+				lib.CLI.RateLimit,
+				lib.CLI.RateWindow,
+				lib.CLI.RateCleanupMs,
+			)
+			lib.Logger.Info("Basic rate limiter initialized",
+				"max_requests", lib.CLI.RateLimit,
+				"window_seconds", lib.CLI.RateWindow,
+				"cleanup_interval_ms", lib.CLI.RateCleanupMs)
+		}
+	}
+
 	// Start the background update ticker
 	startUpdateTicker(gr, lib.CLI.UpdateInterval)
 	lib.Logger.Info("Started background repository update routine", "interval_seconds", lib.CLI.UpdateInterval)
 
 	// Start the server with the configured port
-	if err := server.Run(lib.CLI.Port, gr); err != nil {
+	if err := server.Run(lib.CLI.Port, gr, rateLimiter, enhancedLimiter); err != nil {
 		lib.Logger.Error("Server failed to start", "error", err)
+	}
+
+	// Gracefully stop rate limiters on shutdown
+	if rateLimiter != nil {
+		rateLimiter.Stop()
+	}
+	if enhancedLimiter != nil {
+		enhancedLimiter.Stop()
 	}
 }

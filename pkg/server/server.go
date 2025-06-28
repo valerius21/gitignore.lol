@@ -33,16 +33,29 @@ type HealthResponse struct {
 }
 
 // Run starts the HTTP server
-func Run(port int, gitRunner *lib.GitRunner) error {
+func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter) error {
 	app := fiber.New()
 
-	// Serve Swagger UI
+	// Apply rate limiting middleware to API routes only
+	apiGroup := app.Group("/api")
+	if enhancedLimiter != nil {
+		lib.Logger.Info("Enhanced rate limiting enabled with scanner protection")
+		apiGroup.Use(lib.EnhancedRateLimitMiddleware(enhancedLimiter))
+	} else if rateLimiter != nil {
+		lib.Logger.Info("Basic rate limiting enabled", "max_requests", rateLimiter.GetStats()["max_requests"], "window_seconds", rateLimiter.GetStats()["window_seconds"])
+		apiGroup.Use(lib.RateLimitMiddleware(rateLimiter))
+	} else {
+		lib.Logger.Info("Rate limiting disabled")
+	}
+
+	// Serve Swagger UI (no rate limiting)
 	app.Get("/swagger/*", swagger.New(swagger.Config{
 		URL:         "/swagger/doc.json",
 		DeepLinking: true,
 		Title:       "gitignore.lol API Documentation",
 	}))
 
+	// Serve static files (no rate limiting)
 	app.Use("/", filesystem.New(filesystem.Config{
 		Root:       http.FS(web.LandingPageFiles),
 		PathPrefix: "landing-page/dist",
@@ -53,13 +66,20 @@ func Run(port int, gitRunner *lib.GitRunner) error {
 		return c.Redirect("/")
 	})
 
-	// app.Get("/api/healthz", healthCheck)
-	app.Get("/api/list", func(c *fiber.Ctx) error {
+	// API routes with rate limiting
+	apiGroup.Get("/list", func(c *fiber.Ctx) error {
 		return listTemplates(c, gitRunner)
 	})
-	app.Get("/api/*", func(c *fiber.Ctx) error {
+	apiGroup.Get("/*", func(c *fiber.Ctx) error {
 		return getTemplates(c, gitRunner)
 	})
+
+	// Rate limiter stats endpoint (no rate limiting)
+	if enhancedLimiter != nil {
+		app.Get("/stats", lib.EnhancedStatsHandler(enhancedLimiter))
+	} else {
+		app.Get("/stats", lib.RateLimitStatsHandler(rateLimiter))
+	}
 
 	return app.Listen(fmt.Sprintf(":%d", port))
 }

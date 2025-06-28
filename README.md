@@ -14,7 +14,7 @@ gitignore.lol is a modern, fast, and simple service for generating `.gitignore` 
 - 🚀 **Zero Fuss** - Quick and simple .gitignore generation powered by GitHub's official templates.
 - 💻 **Web or CLI** - Generate templates through the web interface or use the REST API - whatever fits your workflow best.
 - ⚡ **Fast & Reliable** - Built with Go for maximum performance and reliability.
-- 🔒 **Rate Limited** - Protected against abuse with sensible rate limits.
+- 🔒 **Rate Limited** - Protected against abuse with configurable moving window rate limits optimized for efficiency.
 - 🌐 **CORS Enabled** - Ready for cross-origin requests.
 
 ## Quick Start
@@ -107,6 +107,24 @@ go test ./...
 
 - `PORT` - Server port (default: 3000)
 - `LOG_LEVEL` - Logging level (default: warn)
+
+### Rate Limiting
+
+The service includes a high-performance moving window rate limiter optimized for resource-constrained environments:
+
+- **Configurable limits**: Set max requests per IP per time window
+- **Memory efficient**: Automatic cleanup prevents memory leaks
+- **Monitoring**: `/stats` endpoint for operational visibility
+- **Selective**: Only applies to API endpoints, not static content
+
+Example usage:
+```bash
+# Custom rate limiting (50 requests per 30 seconds)
+./gitignore-server --rate-limit 50 --rate-window 30
+
+# Disable rate limiting
+./gitignore-server --enable-rate-limit=false
+```
 
 ### Running the server
 
