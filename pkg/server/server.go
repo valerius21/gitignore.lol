@@ -33,7 +33,7 @@ type HealthResponse struct {
 }
 
 // Run starts the HTTP server and returns the app for graceful shutdown
-func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter) (*fiber.App, error) {
+func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter, enableStats bool) (*fiber.App, error) {
 	app := fiber.New()
 
 	landingPageFS, err := fs.Sub(web.LandingPageFiles, "landing-page/dist")
@@ -75,11 +75,13 @@ func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimite
 		return getTemplates(c, gitRunner)
 	})
 
-	// Rate limiter stats endpoint (no rate limiting)
-	if enhancedLimiter != nil {
-		app.Get("/stats", lib.EnhancedStatsHandler(enhancedLimiter))
-	} else {
-		app.Get("/stats", lib.RateLimitStatsHandler(rateLimiter))
+	// Rate limiter stats endpoint (no rate limiting, only if enabled)
+	if enableStats {
+		if enhancedLimiter != nil {
+			app.Get("/stats", lib.EnhancedStatsHandler(enhancedLimiter))
+		} else {
+			app.Get("/stats", lib.RateLimitStatsHandler(rateLimiter))
+		}
 	}
 
 	// Start listening in a goroutine

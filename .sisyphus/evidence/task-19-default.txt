@@ -1,0 +1,1 @@
+	UseEnhancedLimiter bool `help:"Use enhanced rate limiter with scanner protection" name:"enhanced-limiter" default:"true"`

@@ -37,7 +37,7 @@ curl https://gitignore.lol/api/go,node
 
 Requirements:
 
-- Go 1.21.6 or later
+- Go 1.25 or later
 - Git
 
 ```bash
@@ -49,10 +49,10 @@ cd gitignore.lol
 go mod download
 
 # Build
-go build -o gitignore-server ./cmd/gitignore_server.go
+go build -o gitignore-lol ./cmd/main.go
 
 # Run
-./gitignore-server
+./gitignore-lol
 ```
 
 ## API Documentation
@@ -72,7 +72,8 @@ The API is documented using OpenAPI/Swagger. You can access the documentation at
 
 ### Prerequisites
 
-- Go 1.21.6 or later
+- Go 1.25 or later
+- Bun (for frontend)
 - Docker (optional)
 - Git
 
@@ -97,15 +98,15 @@ go mod download
 go test ./...
 ```
 
-4. Generate Swagger documentation
+4. Generate documentation
 
 ```bash
-./scripts/generate-swagger.sh
+./scripts/generate_docs.sh
 ```
 
 ### Environment Variables
 
-- `PORT` - Server port (default: 3000)
+- `PORT` - Server port (default: 4444)
 - `LOG_LEVEL` - Logging level (default: warn)
 
 ### Rate Limiting
