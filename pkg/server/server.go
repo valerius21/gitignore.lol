@@ -4,9 +4,12 @@ package server
 import (
 	"fmt"
 	"io/fs"
+	"strings"
 
 	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	recovermw "github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/static"
 
 	_ "me.valerius/gitignore-lol/docs"
@@ -32,14 +35,16 @@ type HealthResponse struct {
 	Status string `json:"status" example:"OK"`
 }
 
-// Run starts the HTTP server and returns the app for graceful shutdown
-func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter, enableStats bool) (*fiber.App, error) {
+func newApp(gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter, enableStats bool, corsOrigins string) (*fiber.App, error) {
 	app := fiber.New()
+	applyGlobalMiddleware(app, corsOrigins)
 
 	landingPageFS, err := fs.Sub(web.LandingPageFiles, "landing-page/dist")
 	if err != nil {
 		return nil, fmt.Errorf("prepare static filesystem: %w", err)
 	}
+
+	registerHealthRoute(app)
 
 	// Apply rate limiting middleware to API routes only
 	apiGroup := app.Group("/api")
@@ -82,6 +87,40 @@ func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimite
 		} else {
 			app.Get("/stats", lib.RateLimitStatsHandler(rateLimiter))
 		}
+	}
+
+	return app, nil
+}
+
+func applyGlobalMiddleware(app *fiber.App, corsOrigins string) {
+	app.Use(recovermw.New())
+	app.Use(cors.New(cors.Config{AllowOrigins: parseCorsOrigins(corsOrigins)}))
+}
+
+func parseCorsOrigins(corsOrigins string) []string {
+	if corsOrigins == "" {
+		return []string{"*"}
+	}
+
+	origins := strings.Split(corsOrigins, ",")
+	for i := range origins {
+		origins[i] = strings.TrimSpace(origins[i])
+	}
+
+	return origins
+}
+
+func registerHealthRoute(app *fiber.App) {
+	app.Get("/health", func(c fiber.Ctx) error {
+		return c.Status(fiber.StatusOK).JSON(HealthResponse{Status: "ok"})
+	})
+}
+
+// Run starts the HTTP server and returns the app for graceful shutdown
+func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter, enableStats bool, corsOrigins string) (*fiber.App, error) {
+	app, err := newApp(gitRunner, rateLimiter, enhancedLimiter, enableStats, corsOrigins)
+	if err != nil {
+		return nil, err
 	}
 
 	// Start listening in a goroutine

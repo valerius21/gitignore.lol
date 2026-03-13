@@ -89,7 +89,7 @@ func main() {
 	lib.Logger.Info("Started background repository update routine", "interval_seconds", lib.CLI.UpdateInterval)
 
 	// Start the server with the configured port
-	app, err := server.Run(lib.CLI.Port, gr, rateLimiter, enhancedLimiter, lib.CLI.EnableStats)
+	app, err := server.Run(lib.CLI.Port, gr, rateLimiter, enhancedLimiter, lib.CLI.EnableStats, lib.CLI.CorsOrigins)
 	if err != nil {
 		lib.Logger.Error("Server failed to start", "error", err)
 		os.Exit(1)
