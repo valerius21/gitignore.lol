@@ -180,3 +180,17 @@ func TestGetTemplates_OrderPreservation(t *testing.T) {
 		t.Fatalf("expected Node content before Go content, got %q", body)
 	}
 }
+
+func TestGetTemplates_URLEncodedList(t *testing.T) {
+	app, fixtures := setupTestApp(t)
+
+	resp := performGetRequest(t, app, "/api/go%2Cnode")
+	if resp.StatusCode != fiber.StatusOK {
+		t.Fatalf("expected status %d, got %d", fiber.StatusOK, resp.StatusCode)
+	}
+
+	body := readResponseBody(t, resp)
+	if !strings.Contains(body, fixtures["go"]) || !strings.Contains(body, fixtures["node"]) {
+		t.Fatalf("expected both Go and Node template content in response, got %q", body)
+	}
+}
