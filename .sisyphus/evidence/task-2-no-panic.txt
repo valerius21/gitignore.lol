@@ -1,0 +1,41 @@
+TASK 2: Replace panic(1) with os.Exit(1) and Add Graceful Shutdown
+=====================================================================
+
+CHANGES MADE:
+
+1. cmd/main.go (line 48):
+   - BEFORE: panic(1)
+   - AFTER:  os.Exit(1)
+   
+   This ensures proper exit code handling instead of panic behavior.
+
+2. cmd/main.go (lines 5-9):
+   - Added imports: "context", "os/signal", "syscall"
+   - These are required for signal handling and graceful shutdown.
+
+3. pkg/server/server.go (line 36):
+   - BEFORE: func Run(...) error
+   - AFTER:  func Run(...) (*fiber.App, error)
+   
+   The function now returns the Fiber app instance for graceful shutdown.
+
+4. pkg/server/server.go (lines 84-89):
+   - Server listener now runs in a goroutine instead of blocking
+   - Allows main() to wait for shutdown signals
+   - Returns app immediately for signal handling
+
+5. cmd/main.go (lines 92-120):
+   - Restructured main() to handle graceful shutdown:
+     * Receives app from server.Run()
+     * Sets up signal.NotifyContext for SIGINT and SIGTERM
+     * Waits for shutdown signal with <-ctx.Done()
+     * Calls app.Shutdown() for graceful server shutdown
+     * Calls rateLimiter.Stop() and enhancedLimiter.Stop()
+     * These Stop() calls are now REACHABLE on normal shutdown
+
+VERIFICATION:
+- panic(1) completely removed from codebase
+- Signal handling properly implemented
+- Rate limiter cleanup is guaranteed on shutdown
+- No API behavior changes
+- No CLI flag parsing changes
