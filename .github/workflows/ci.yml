@@ -1,0 +1,64 @@
+name: CI
+
+'on':
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  go-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install frontend dependencies
+        working-directory: web/landing-page
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend assets for embed
+        working-directory: web/landing-page
+        run: bun run build
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run go tests
+        run: go test -race ./...
+
+      - name: Build Go binary
+        run: go build ./cmd/main.go
+
+  frontend-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install frontend dependencies
+        working-directory: web/landing-page
+        run: bun install --frozen-lockfile
+
+      - name: Run frontend lint
+        working-directory: web/landing-page
+        run: bun run lint
+
+      - name: Build frontend
+        working-directory: web/landing-page
+        run: bun run build

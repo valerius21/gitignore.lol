@@ -1,0 +1,15 @@
+Task 13 CI evidence
+Workflow: .github/workflows/ci.yml
+YAML validation: PASS (uv run --with pyyaml python3 -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml'))")
+Triggers: pull_request -> [main, master], push -> [main, master]
+Jobs: go-checks, frontend-checks
+Parallelism: PASS (no needs dependency in either job)
+go-checks uses: actions/checkout@v4, actions/setup-go@v5, oven-sh/setup-bun@v2
+go-checks run commands: bun install --frozen-lockfile; bun run build; go vet ./...; go test -race ./...; go build ./cmd/main.go
+frontend-checks uses: actions/checkout@v4, oven-sh/setup-bun@v2
+frontend-checks run commands: bun install --frozen-lockfile; bun run lint; bun run build
+Secrets/deploy steps: PASS (none found)
+Note: repo-local python3 lacks PyYAML, so YAML parsing used uv ephemeral dependency resolution.
+Local verification: PASS (bun install --frozen-lockfile && bun run lint && bun run build in web/landing-page)
+Local verification: PASS (nix shell nixpkgs#go nixpkgs#gcc -c sh -c "go vet ./... && go test -race ./... && go build ./cmd/main.go")
+LSP diagnostics: PASS for .github/workflows/ci.yml
