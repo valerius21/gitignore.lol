@@ -62,10 +62,6 @@ func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimite
 		Browse:     true,
 	}))
 
-	app.Get("/documentation", func(c *fiber.Ctx) error {
-		return c.Redirect("/")
-	})
-
 	// API routes with rate limiting
 	apiGroup.Get("/list", func(c *fiber.Ctx) error {
 		return listTemplates(c, gitRunner)

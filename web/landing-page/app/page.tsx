@@ -12,11 +12,6 @@ export default function Home() {
           gitignore.lol
         </Link>
         <nav className="flex items-center gap-4">
-          <Link href="/documentation" className="text-gray-400 hover:text-white">
-            <Button size="sm">
-              Documentation
-            </Button>
-          </Link>
           <Link href="/swagger/index.html" className="text-gray-400 hover:text-white">
             <Button size="sm">
               Swagger / OpenAPI
