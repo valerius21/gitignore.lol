@@ -121,10 +121,10 @@ The service includes a high-performance moving window rate limiter optimized for
 Example usage:
 ```bash
 # Custom rate limiting (50 requests per 30 seconds)
-./gitignore-server --rate-limit 50 --rate-window 30
+./gitignore-lol --rate-limit 50 --rate-window 30
 
 # Disable rate limiting
-./gitignore-server --enable-rate-limit=false
+./gitignore-lol --enable-rate-limit=false
 ```
 
 ### Running the server
