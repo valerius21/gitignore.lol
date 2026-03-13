@@ -6,7 +6,7 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/gofiber/contrib/swagger"
+	swaggo "github.com/gofiber/contrib/v3/swaggo"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	recovermw "github.com/gofiber/fiber/v3/middleware/recover"
@@ -59,12 +59,7 @@ func newApp(gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enha
 	}
 
 	// Serve Swagger UI (no rate limiting)
-	app.Use(swagger.New(swagger.Config{
-		BasePath: "/",
-		FilePath: "./docs/swagger.json",
-		Path:     "swagger",
-		Title:    "gitignore.lol API Documentation",
-	}))
+	app.Get("/swagger/*", swaggo.HandlerDefault)
 
 	// Serve static files (no rate limiting)
 	app.Use("/", static.New("", static.Config{
