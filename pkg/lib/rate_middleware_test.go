@@ -2,6 +2,7 @@ package lib
 
 import (
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gofiber/fiber/v3"
@@ -127,7 +128,8 @@ func TestRateLimitStatsHandler(t *testing.T) {
 	}
 
 	// Verify response is JSON with expected fields
-	if resp.Header.Get("Content-Type") != "application/json" {
-		t.Errorf("Expected Content-Type application/json, got %s", resp.Header.Get("Content-Type"))
+	contentType := resp.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "application/json") {
+		t.Errorf("Expected Content-Type application/json, got %s", contentType)
 	}
 }
