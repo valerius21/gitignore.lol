@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	lib "me.valerius/gitignore-lol/pkg/lib"
 )
 
@@ -39,10 +39,10 @@ func setupTestApp(t *testing.T) (*fiber.App, map[string]string) {
 
 	app := fiber.New()
 	apiGroup := app.Group("/api")
-	apiGroup.Get("/list", func(c *fiber.Ctx) error {
+	apiGroup.Get("/list", func(c fiber.Ctx) error {
 		return listTemplates(c, gr)
 	})
-	apiGroup.Get("/*", func(c *fiber.Ctx) error {
+	apiGroup.Get("/*", func(c fiber.Ctx) error {
 		return getTemplates(c, gr)
 	})
 

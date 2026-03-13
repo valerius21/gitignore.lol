@@ -4,7 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 func TestRateLimitMiddleware_AllowsRequests(t *testing.T) {
@@ -17,7 +17,7 @@ func TestRateLimitMiddleware_AllowsRequests(t *testing.T) {
 	app.Use(RateLimitMiddleware(limiter))
 
 	// Add a simple test route
-	app.Get("/test", func(c *fiber.Ctx) error {
+	app.Get("/test", func(c fiber.Ctx) error {
 		return c.SendString("OK")
 	})
 
@@ -45,7 +45,7 @@ func TestRateLimitMiddleware_BlocksExcess(t *testing.T) {
 	app.Use(RateLimitMiddleware(limiter))
 
 	// Add a simple test route
-	app.Get("/test", func(c *fiber.Ctx) error {
+	app.Get("/test", func(c fiber.Ctx) error {
 		return c.SendString("OK")
 	})
 
@@ -86,7 +86,7 @@ func TestRateLimitMiddleware_NilLimiter(t *testing.T) {
 	app.Use(RateLimitMiddleware(nil))
 
 	// Add a simple test route
-	app.Get("/test", func(c *fiber.Ctx) error {
+	app.Get("/test", func(c fiber.Ctx) error {
 		return c.SendString("OK")
 	})
 

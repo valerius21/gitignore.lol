@@ -3,11 +3,11 @@ package server
 
 import (
 	"fmt"
-	"net/http"
+	"io/fs"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	"github.com/gofiber/swagger"
+	"github.com/gofiber/contrib/swagger"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/static"
 
 	_ "me.valerius/gitignore-lol/docs"
 	lib "me.valerius/gitignore-lol/pkg/lib"
@@ -36,6 +36,11 @@ type HealthResponse struct {
 func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter) (*fiber.App, error) {
 	app := fiber.New()
 
+	landingPageFS, err := fs.Sub(web.LandingPageFiles, "landing-page/dist")
+	if err != nil {
+		return nil, fmt.Errorf("prepare static filesystem: %w", err)
+	}
+
 	// Apply rate limiting middleware to API routes only
 	apiGroup := app.Group("/api")
 	if enhancedLimiter != nil {
@@ -49,24 +54,24 @@ func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimite
 	}
 
 	// Serve Swagger UI (no rate limiting)
-	app.Get("/swagger/*", swagger.New(swagger.Config{
-		URL:         "/swagger/doc.json",
-		DeepLinking: true,
-		Title:       "gitignore.lol API Documentation",
+	app.Use(swagger.New(swagger.Config{
+		BasePath: "/",
+		FilePath: "./docs/swagger.json",
+		Path:     "swagger",
+		Title:    "gitignore.lol API Documentation",
 	}))
 
 	// Serve static files (no rate limiting)
-	app.Use("/", filesystem.New(filesystem.Config{
-		Root:       http.FS(web.LandingPageFiles),
-		PathPrefix: "landing-page/dist",
-		Browse:     true,
+	app.Use("/", static.New("", static.Config{
+		FS:     landingPageFS,
+		Browse: true,
 	}))
 
 	// API routes with rate limiting
-	apiGroup.Get("/list", func(c *fiber.Ctx) error {
+	apiGroup.Get("/list", func(c fiber.Ctx) error {
 		return listTemplates(c, gitRunner)
 	})
-	apiGroup.Get("/*", func(c *fiber.Ctx) error {
+	apiGroup.Get("/*", func(c fiber.Ctx) error {
 		return getTemplates(c, gitRunner)
 	})
 
