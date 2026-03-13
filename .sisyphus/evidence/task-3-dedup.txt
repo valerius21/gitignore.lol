@@ -1,0 +1,24 @@
+=== TEMPLATE DEDUPLICATION ORDER PRESERVATION ===
+
+File: pkg/server/api.go lines 65-76
+Expected: Order-preserving deduplication using slice iteration
+
+Actual implementation:
+	// Deduplicate parameters while preserving order
+	seen := make(map[string]struct{})
+	var orderedParams []string
+	for _, name := range strings.Split(decodedParams, ",") {
+		if _, exists := seen[name]; !exists {
+			seen[name] = struct{}{}
+			orderedParams = append(orderedParams, name)
+		}
+	}
+
+	var res strings.Builder
+	for _, name := range orderedParams {
+
+Verification:
+- Uses 'seen' map for tracking: YES
+- Uses 'orderedParams' slice: YES
+- Iterates over orderedParams (not map): YES
+- Preserves input order: YES

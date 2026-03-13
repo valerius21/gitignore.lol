@@ -310,11 +310,3 @@ func (erl *EnhancedRateLimiter) GetStats() map[string]interface{} {
 func (erl *EnhancedRateLimiter) Stop() {
 	close(erl.stopCleanup)
 }
-
-// Helper function for max (Go < 1.21 compatibility)
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}

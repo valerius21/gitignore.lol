@@ -18,7 +18,7 @@ import (
 
 // @host      gitignore.lol
 // @BasePath  /
-// @schemes   http,https
+// @schemes   http https
 
 // ListTemplates godoc
 // @Summary      List available templates
@@ -62,14 +62,18 @@ func getTemplates(c *fiber.Ctx, gitRunner *lib.GitRunner) error {
 	}
 	lib.Logger.Info(decodedParams)
 
-	// Deduplicate parameters using a map
-	uniqueParams := make(map[string]struct{})
+	// Deduplicate parameters while preserving order
+	seen := make(map[string]struct{})
+	var orderedParams []string
 	for _, name := range strings.Split(decodedParams, ",") {
-		uniqueParams[name] = struct{}{}
+		if _, exists := seen[name]; !exists {
+			seen[name] = struct{}{}
+			orderedParams = append(orderedParams, name)
+		}
 	}
 
 	var res strings.Builder
-	for name := range uniqueParams {
+	for _, name := range orderedParams {
 		lib.Logger.Info("Request", "param", name)
 		content, err := gitRunner.GetFileContents(name)
 		if err != nil {

@@ -2,7 +2,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/alecthomas/kong"
@@ -41,7 +45,7 @@ func main() {
 	err := gr.Init()
 	if err != nil {
 		lib.Logger.Error("Failed to initialize Git Repository", "error", err)
-		panic(1)
+		os.Exit(1)
 	}
 
 	lib.Logger.Info(fmt.Sprintf("Gitignores cloned to %s\n", gr.LocalPath))
@@ -85,8 +89,24 @@ func main() {
 	lib.Logger.Info("Started background repository update routine", "interval_seconds", lib.CLI.UpdateInterval)
 
 	// Start the server with the configured port
-	if err := server.Run(lib.CLI.Port, gr, rateLimiter, enhancedLimiter); err != nil {
+	app, err := server.Run(lib.CLI.Port, gr, rateLimiter, enhancedLimiter)
+	if err != nil {
 		lib.Logger.Error("Server failed to start", "error", err)
+		os.Exit(1)
+	}
+
+	// Set up signal handling for graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Wait for shutdown signal
+	<-ctx.Done()
+
+	lib.Logger.Info("Shutdown signal received, gracefully shutting down...")
+
+	// Gracefully shutdown the server
+	if err := app.Shutdown(); err != nil {
+		lib.Logger.Error("Server shutdown error", "error", err)
 	}
 
 	// Gracefully stop rate limiters on shutdown
@@ -96,4 +116,6 @@ func main() {
 	if enhancedLimiter != nil {
 		enhancedLimiter.Stop()
 	}
+
+	lib.Logger.Info("Shutdown complete")
 }

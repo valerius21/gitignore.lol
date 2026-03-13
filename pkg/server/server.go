@@ -32,8 +32,8 @@ type HealthResponse struct {
 	Status string `json:"status" example:"OK"`
 }
 
-// Run starts the HTTP server
-func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter) error {
+// Run starts the HTTP server and returns the app for graceful shutdown
+func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enhancedLimiter *lib.EnhancedRateLimiter) (*fiber.App, error) {
 	app := fiber.New()
 
 	// Apply rate limiting middleware to API routes only
@@ -81,5 +81,12 @@ func Run(port int, gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimite
 		app.Get("/stats", lib.RateLimitStatsHandler(rateLimiter))
 	}
 
-	return app.Listen(fmt.Sprintf(":%d", port))
+	// Start listening in a goroutine
+	go func() {
+		if err := app.Listen(fmt.Sprintf(":%d", port)); err != nil {
+			lib.Logger.Error("Server error", "error", err)
+		}
+	}()
+
+	return app, nil
 }
