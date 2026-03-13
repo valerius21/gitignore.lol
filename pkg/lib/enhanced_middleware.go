@@ -2,12 +2,12 @@
 package lib
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // EnhancedRateLimitMiddleware creates a Fiber middleware with advanced scanner protection
 func EnhancedRateLimitMiddleware(limiter *EnhancedRateLimiter) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		if limiter == nil {
 			return c.Next()
 		}
@@ -57,7 +57,7 @@ func EnhancedRateLimitMiddleware(limiter *EnhancedRateLimiter) fiber.Handler {
 
 // EnhancedStatsHandler provides detailed statistics for the enhanced rate limiter
 func EnhancedStatsHandler(limiter *EnhancedRateLimiter) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		if limiter == nil {
 			return c.JSON(fiber.Map{
 				"enhanced_rate_limiting": "disabled",

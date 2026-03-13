@@ -1,0 +1,10 @@
+.git
+.github
+.sisyphus
+store/
+web/landing-page/node_modules/
+web/landing-page/.next/
+*.test
+*.out
+README.md
+LICENSE

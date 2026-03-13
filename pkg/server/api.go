@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	lib "me.valerius/gitignore-lol/pkg/lib"
 )
 
@@ -18,7 +18,7 @@ import (
 
 // @host      gitignore.lol
 // @BasePath  /
-// @schemes   http,https
+// @schemes   http https
 
 // ListTemplates godoc
 // @Summary      List available templates
@@ -28,7 +28,7 @@ import (
 // @Success      200  {object}  server.TemplateResponse  "List of available templates"
 // @Failure      500  {object}  server.ErrorResponse     "Internal server error"
 // @Router       /api/list [get]
-func listTemplates(c *fiber.Ctx, gitRunner *lib.GitRunner) error {
+func listTemplates(c fiber.Ctx, gitRunner *lib.GitRunner) error {
 	fileNames, err := gitRunner.ListFiles()
 	if err != nil {
 		lib.Logger.Error("List Files", "error", err)
@@ -51,7 +51,7 @@ func listTemplates(c *fiber.Ctx, gitRunner *lib.GitRunner) error {
 // @Failure      400  {object}  server.ErrorResponse  "Template not found"
 // @Failure      500  {object}  server.ErrorResponse  "Internal server error"
 // @Router       /api/{templateList} [get]
-func getTemplates(c *fiber.Ctx, gitRunner *lib.GitRunner) error {
+func getTemplates(c fiber.Ctx, gitRunner *lib.GitRunner) error {
 	params := c.Params("*")
 	decodedParams, err := url.QueryUnescape(params)
 	if err != nil {
@@ -62,14 +62,18 @@ func getTemplates(c *fiber.Ctx, gitRunner *lib.GitRunner) error {
 	}
 	lib.Logger.Info(decodedParams)
 
-	// Deduplicate parameters using a map
-	uniqueParams := make(map[string]struct{})
+	// Deduplicate parameters while preserving order
+	seen := make(map[string]struct{})
+	var orderedParams []string
 	for _, name := range strings.Split(decodedParams, ",") {
-		uniqueParams[name] = struct{}{}
+		if _, exists := seen[name]; !exists {
+			seen[name] = struct{}{}
+			orderedParams = append(orderedParams, name)
+		}
 	}
 
 	var res strings.Builder
-	for name := range uniqueParams {
+	for _, name := range orderedParams {
 		lib.Logger.Info("Request", "param", name)
 		content, err := gitRunner.GetFileContents(name)
 		if err != nil {

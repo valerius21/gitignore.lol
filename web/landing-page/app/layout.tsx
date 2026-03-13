@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "gitiginore.lol",
-  description: "gitignore.lol | create gitignorefiles with ease",
+  title: "gitignore.lol",
+  description: "gitignore.lol | create gitignore files with ease",
 };
 
 

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/go-git/go-git/v5"
 )
@@ -14,6 +15,7 @@ type GitRunner struct {
 	LocalPath     string
 	fetchInterval int
 	langPaths     map[string]string
+	mu            sync.RWMutex
 }
 
 func NewGitRunner(origin, path string, fetchInterval int) *GitRunner {
@@ -84,11 +86,16 @@ func (gr *GitRunner) ListFiles() ([]string, error) {
 	}
 
 	fileNames := make([]string, len(files))
+	newMap := make(map[string]string)
 	for i, file := range files {
 		fileNames[i] = strings.ToLower(filepath.Base(file))
 		fileNames[i] = strings.ReplaceAll(fileNames[i], ".gitignore", "")
-		gr.langPaths[fileNames[i]] = file
+		newMap[fileNames[i]] = file
 	}
+
+	gr.mu.Lock()
+	gr.langPaths = newMap
+	gr.mu.Unlock()
 
 	uniqueFiles := RemoveEmptyString(fileNames)
 	uniqueFiles = RemoveDuplicates(uniqueFiles)
@@ -99,13 +106,17 @@ func (gr *GitRunner) GetFileContents(name string) (string, error) {
 	name = strings.ToLower(name)
 
 	// Use the pre-populated langPaths map that was created in ListFiles()
-	if filePath, exists := gr.langPaths[name]; exists {
-		content, err := os.ReadFile(filePath)
-		if err != nil {
-			return "", fmt.Errorf("error reading file %s: %w", filePath, err)
-		}
-		return string(content), nil
+	gr.mu.RLock()
+	filePath, exists := gr.langPaths[name]
+	gr.mu.RUnlock()
+	if !exists {
+		return "", fmt.Errorf("gitignore file for '%s' not found", name)
 	}
 
-	return "", fmt.Errorf("gitignore file for '%s' not found", name)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("error reading file %s: %w", filePath, err)
+	}
+
+	return string(content), nil
 }
