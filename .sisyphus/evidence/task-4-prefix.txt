@@ -1,0 +1,14 @@
+Enhanced rate limiter prefix matching evidence
+
+Current matcher:
+if strings.HasPrefix(path, scannerPath) {
+    return true
+}
+
+False positive avoided:
+- /api/testing no longer matches /test
+
+Build verification:
+- Environment: nix shell nixpkgs#go nixpkgs#gcc
+- Command: go build ./cmd/main.go
+- Result: success

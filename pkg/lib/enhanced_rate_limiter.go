@@ -59,19 +59,13 @@ func NewEnhancedRateLimiter(normalLimit, errorLimit int, windowSeconds, blockMin
 func getScannerPaths() []string {
 	return []string{
 		"/wp-admin", "/wp-login", "/wordpress", "/wp-content",
-		"/admin", "/administrator", "/phpmyadmin", "/phpMyAdmin",
-		"/cgi-bin", "/scripts", "/HNAP1", "/wpad.dat",
-		"/.env", "/.git", "/config", "/backup",
-		"/test", "/demo", "/tmp", "/temp",
+		"/phpmyadmin", "/phpMyAdmin",
+		"/cgi-bin", "/HNAP1", "/wpad.dat",
+		"/.env", "/.git", "/.aws", "/.docker", "/.kube",
 		"/xmlrpc.php", "/wp-config.php", "/web.config",
-		"/robots.txt", "/sitemap.xml", "/.well-known",
 		"/vendor", "/node_modules", "/package.json",
 		"/solr", "/elasticsearch", "/kibana",
-		"/login", "/signin", "/auth", "/oauth",
-		"/api/v1", "/api/v2", "/v1", "/v2",
-		"/health", "/status", "/ping", "/info",
-		"/debug", "/trace", "/actuator",
-		"/.aws", "/.docker", "/.kube",
+		"/actuator",
 		"/server-status", "/server-info",
 		"/crossdomain.xml", "/clientaccesspolicy.xml",
 	}
@@ -82,7 +76,7 @@ func (erl *EnhancedRateLimiter) IsScannerPath(path string) bool {
 	path = strings.ToLower(path)
 
 	for _, scannerPath := range erl.scannerPaths {
-		if strings.Contains(path, scannerPath) {
+		if strings.HasPrefix(path, scannerPath) {
 			return true
 		}
 	}
@@ -90,10 +84,8 @@ func (erl *EnhancedRateLimiter) IsScannerPath(path string) bool {
 	// Check for common file extensions targeted by scanners
 	suspiciousExtensions := []string{
 		".php", ".asp", ".aspx", ".jsp", ".cgi", ".pl",
-		".py", ".rb", ".sh", ".bat", ".cmd",
 		".sql", ".db", ".bak", ".old", ".tmp",
 		".zip", ".tar", ".rar", ".7z",
-		".log", ".txt", ".conf", ".cfg",
 	}
 
 	for _, ext := range suspiciousExtensions {

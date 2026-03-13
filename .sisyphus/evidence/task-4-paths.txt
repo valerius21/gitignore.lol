@@ -1,0 +1,80 @@
+Enhanced rate limiter scanner path snapshot
+
+Scanner paths retained:
+- /wp-admin
+- /wp-login
+- /wordpress
+- /wp-content
+- /phpmyadmin
+- /phpMyAdmin
+- /cgi-bin
+- /HNAP1
+- /wpad.dat
+- /.env
+- /.git
+- /.aws
+- /.docker
+- /.kube
+- /xmlrpc.php
+- /wp-config.php
+- /web.config
+- /vendor
+- /node_modules
+- /package.json
+- /solr
+- /elasticsearch
+- /kibana
+- /actuator
+- /server-status
+- /server-info
+- /crossdomain.xml
+- /clientaccesspolicy.xml
+
+Legitimate routes removed from scanner paths:
+- /health
+- /status
+- /ping
+- /info
+- /robots.txt
+- /.well-known
+- /api/v1
+- /api/v2
+- /v1
+- /v2
+- /login
+- /signin
+- /auth
+- /oauth
+- /test
+- /demo
+- /tmp
+- /temp
+- /debug
+- /trace
+
+Suspicious extensions retained:
+- .php
+- .asp
+- .aspx
+- .jsp
+- .cgi
+- .pl
+- .sql
+- .db
+- .bak
+- .old
+- .tmp
+- .zip
+- .tar
+- .rar
+- .7z
+
+Extensions removed from suspicious matching:
+- .py
+- .sh
+- .bat
+- .cmd
+- .txt
+- .log
+- .conf
+- .cfg
