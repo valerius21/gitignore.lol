@@ -1,6 +1,6 @@
 module me.valerius/gitignore-lol
 
-go 1.23.5
+go 1.25
 
 require github.com/gofiber/swagger v1.1.1
 
