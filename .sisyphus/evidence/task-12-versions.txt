@@ -1,0 +1,2 @@
+    "next": "15.5.12",
+    "eslint-config-next": "15.5.12",
