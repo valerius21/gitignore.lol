@@ -39,7 +39,7 @@ export default function Home() {
             </h1>
             <p className="text-xl sm:text-2xl text-gray-400">For devs who hate commit noise</p>
             <p className="text-gray-500">No redirects. No ads. Just clean,
-              <a href="https://github.com/github/gitignore" target="_blank" className="mx-1 underline underline-offset-2 hover:text-white transition-colors">
+              <a href="https://github.com/github/gitignore" target="_blank" rel="noopener noreferrer" className="mx-1 underline underline-offset-2 hover:text-white transition-colors">
                 GitHub-powered
               </a>
               templates.</p>
@@ -49,7 +49,7 @@ export default function Home() {
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
               >
-                <Link href="https://github.com/github/gitignore" target="_blank">
+                <Link href="https://github.com/github/gitignore" target="_blank" rel="noopener noreferrer">
                   <Search className="mr-2 h-5 w-5" />
                   Browse Templates
                 </Link>
@@ -72,7 +72,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="p-6 rounded-lg border border-gray-800 bg-gray-900/50 space-y-4">
+              <div key={feature.title} className="p-6 rounded-lg border border-gray-800 bg-gray-900/50 space-y-4">
                 <div className="text-2xl">{feature.icon}</div>
                 <h3 className="text-lg font-semibold">{feature.title}</h3>
                 <p className="text-gray-400">{feature.description}</p>
@@ -83,8 +83,8 @@ export default function Home() {
       </main>
 
       <footer className="absolute bottom-0 w-full py-6 text-center text-gray-500 text-sm">
-        Built with ♥️ for developers by <a href="https://valerius.me" target="_blank" className="underline">Valerius Mattfeld</a>.
-        <a href="https://valerius.me/a6ea07d7-93e9-4377-9630-b3f79779f422" className="ml-2 underline">
+        Built with ♥️ for developers by <a href="https://valerius.me" target="_blank" rel="noopener noreferrer" className="underline">Valerius Mattfeld</a>.
+        <a href="https://valerius.me/a6ea07d7-93e9-4377-9630-b3f79779f422" rel="noopener noreferrer" className="ml-2 underline">
           Legal.
         </a>
       </footer>

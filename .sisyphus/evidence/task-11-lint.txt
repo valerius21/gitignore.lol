@@ -1,0 +1,8 @@
+=== target="_blank" links ===
+22:            target="_blank"
+42:              <a href="https://github.com/github/gitignore" target="_blank" rel="noopener noreferrer" className="mx-1 underline underline-offset-2 hover:text-white transition-colors">
+52:                <Link href="https://github.com/github/gitignore" target="_blank" rel="noopener noreferrer">
+86:        Built with ♥️ for developers by <a href="https://valerius.me" target="_blank" rel="noopener noreferrer" className="underline">Valerius Mattfeld</a>.
+
+=== key={index} usage ===
+No key={index} found
