@@ -59,8 +59,8 @@ func NewEnhancedRateLimiter(normalLimit, errorLimit int, windowSeconds, blockMin
 func getScannerPaths() []string {
 	return []string{
 		"/wp-admin", "/wp-login", "/wordpress", "/wp-content",
-		"/phpmyadmin", "/phpMyAdmin",
-		"/cgi-bin", "/HNAP1", "/wpad.dat",
+		"/phpmyadmin", "/phpmyadmin",
+		"/cgi-bin", "/hnap1", "/wpad.dat",
 		"/.env", "/.git", "/.aws", "/.docker", "/.kube",
 		"/xmlrpc.php", "/wp-config.php", "/web.config",
 		"/vendor", "/node_modules", "/package.json",

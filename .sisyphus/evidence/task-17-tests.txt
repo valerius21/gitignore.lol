@@ -1,5 +1,0 @@
-?   	me.valerius/gitignore-lol/cmd	[no test files]
-?   	me.valerius/gitignore-lol/docs	[no test files]
-ok  	me.valerius/gitignore-lol/pkg/lib	(cached)
-ok  	me.valerius/gitignore-lol/pkg/server	(cached)
-?   	me.valerius/gitignore-lol/web	[no test files]

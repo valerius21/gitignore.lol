@@ -1,1 +1,0 @@
-	EnableStats bool `help:"Enable /stats endpoint for rate limiter monitoring" name:"enable-stats" default:"false"`

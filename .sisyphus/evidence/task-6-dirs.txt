@@ -1,3 +1,0 @@
-cmd/docs/ REMOVED
-web/docs/ REMOVED
-docs/ EXISTS (ACTIVE SWAGGER)

@@ -123,7 +123,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "gitignore.lol",
 	BasePath:         "/",
-	Schemes:          []string{"http", "https"},
+	Schemes:          []string{"https", "http"},
 	Title:            "gitignore.lol API",
 	Description:      "A service to generate .gitignore files for your projects. An implementation inspired by the previously known gitignore.io.",
 	InfoInstanceName: "swagger",
