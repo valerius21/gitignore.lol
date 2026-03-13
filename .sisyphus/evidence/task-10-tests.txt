@@ -1,0 +1,21 @@
+=== RUN   TestRateLimitMiddleware_AllowsRequests
+--- PASS: TestRateLimitMiddleware_AllowsRequests (0.00s)
+=== RUN   TestRateLimitMiddleware_BlocksExcess
+time=2026-03-13T17:19:45.352+01:00 level=WARN msg="Rate limit exceeded" ip=0.0.0.0
+--- PASS: TestRateLimitMiddleware_BlocksExcess (0.00s)
+=== RUN   TestRateLimitMiddleware_NilLimiter
+--- PASS: TestRateLimitMiddleware_NilLimiter (0.00s)
+=== RUN   TestRateLimitStatsHandler
+--- PASS: TestRateLimitStatsHandler (0.00s)
+=== RUN   TestRemoveDuplicates
+--- PASS: TestRemoveDuplicates (0.00s)
+=== RUN   TestRemoveDuplicates_Empty
+--- PASS: TestRemoveDuplicates_Empty (0.00s)
+=== RUN   TestRemoveDuplicates_NoDuplicates
+--- PASS: TestRemoveDuplicates_NoDuplicates (0.00s)
+=== RUN   TestRemoveEmptyString
+--- PASS: TestRemoveEmptyString (0.00s)
+=== RUN   TestRemoveEmptyString_AllEmpty
+--- PASS: TestRemoveEmptyString_AllEmpty (0.00s)
+PASS
+ok  	me.valerius/gitignore-lol/pkg/lib	(cached)
