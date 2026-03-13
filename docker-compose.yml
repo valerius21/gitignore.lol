@@ -1,0 +1,16 @@
+services:
+  gitignore-lol:
+    build: .
+    ports:
+      - "4444:4444"
+    volumes:
+      - gitignore-store:/root/store
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4444/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+volumes:
+  gitignore-store:
