@@ -9,4 +9,4 @@
 === RUN   TestGitRunner_ListFiles_Empty
 --- PASS: TestGitRunner_ListFiles_Empty (0.00s)
 PASS
-ok  	me.valerius/gitignore-lol/pkg/lib	1.017s
+ok  	me.valerius/gitignore-lol/pkg/lib	1.016s

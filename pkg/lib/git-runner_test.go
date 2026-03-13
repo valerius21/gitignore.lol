@@ -36,6 +36,9 @@ func TestGitRunner_ListFiles(t *testing.T) {
 	if len(files) != 3 {
 		t.Fatalf("expected 3 files, got %d (%v)", len(files), files)
 	}
+	if len(gr.langPaths) != 3 {
+		t.Fatalf("expected 3 langPaths entries, got %d", len(gr.langPaths))
+	}
 
 	found := make(map[string]bool, len(files))
 	for _, file := range files {
@@ -116,6 +119,7 @@ func TestGitRunner_ConcurrentAccess(t *testing.T) {
 	start := make(chan struct{})
 	errCh := make(chan error, 20)
 	var wg sync.WaitGroup
+	languages := []string{"go", "GO", "Go", "gO"}
 
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
@@ -128,10 +132,10 @@ func TestGitRunner_ConcurrentAccess(t *testing.T) {
 		}()
 
 		wg.Add(1)
-		go func() {
+		go func(i int) {
 			defer wg.Done()
 			<-start
-			content, err := gr.GetFileContents("go")
+			content, err := gr.GetFileContents(languages[i%len(languages)])
 			if err != nil {
 				errCh <- err
 				return
@@ -139,7 +143,7 @@ func TestGitRunner_ConcurrentAccess(t *testing.T) {
 			if content != goContent {
 				errCh <- fmt.Errorf("unexpected content: %q", content)
 			}
-		}()
+		}(i)
 	}
 
 	close(start)
