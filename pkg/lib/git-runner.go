@@ -109,13 +109,14 @@ func (gr *GitRunner) GetFileContents(name string) (string, error) {
 	gr.mu.RLock()
 	filePath, exists := gr.langPaths[name]
 	gr.mu.RUnlock()
-	if exists {
-		content, err := os.ReadFile(filePath)
-		if err != nil {
-			return "", fmt.Errorf("error reading file %s: %w", filePath, err)
-		}
-		return string(content), nil
+	if !exists {
+		return "", fmt.Errorf("gitignore file for '%s' not found", name)
 	}
 
-	return "", fmt.Errorf("gitignore file for '%s' not found", name)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("error reading file %s: %w", filePath, err)
+	}
+
+	return string(content), nil
 }
