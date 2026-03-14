@@ -27,26 +27,38 @@ func NewGitRunner(origin, path string, fetchInterval int) *GitRunner {
 	}
 }
 
-// Init checks, if the local repository exists, if not clones it.
-// If it does exist, it updates it.
+// Init checks if the local path is a valid git repository.
+// If not (missing, empty, or non-git directory), it clones fresh.
+// If it is, it pulls the latest changes.
 func (gr *GitRunner) Init() error {
-	// Check if directory exists, if not clone the repo
-	if _, err := os.Stat(gr.LocalPath); os.IsNotExist(err) {
-		Logger.Info("Cloning", "origin", gr.origin, "path", gr.LocalPath)
-		_, err = git.PlainClone(gr.LocalPath, false, &git.CloneOptions{
-			URL: gr.origin,
-		})
+	// Try to open as a valid git repository first
+	if _, err := git.PlainOpen(gr.LocalPath); err == nil {
+		// Repo exists and is valid — update it
+		Logger.Info("Update", "origin", gr.origin)
+		if err = gr.updateRepo(); err != nil {
+			return err
+		}
+		_, err = gr.ListFiles()
 		return err
 	}
 
-	Logger.Info("Update", "origin", gr.origin)
-	err := gr.updateRepo()
-	if err != nil {
-		return err
+	// Not a valid git repo (directory missing, empty Docker volume, or corrupted) — clone fresh
+	Logger.Info("Cloning", "origin", gr.origin, "path", gr.LocalPath)
+
+	// Remove the path if it exists (handles empty Docker volume mount or partial state)
+	if _, statErr := os.Stat(gr.LocalPath); statErr == nil {
+		if err := os.RemoveAll(gr.LocalPath); err != nil {
+			return fmt.Errorf("failed to remove non-repo directory: %w", err)
+		}
 	}
 
-	// populate langPaths
-	_, err = gr.ListFiles()
+	if _, err := git.PlainClone(gr.LocalPath, false, &git.CloneOptions{
+		URL: gr.origin,
+	}); err != nil {
+		return fmt.Errorf("failed to clone repository: %w", err)
+	}
+
+	_, err := gr.ListFiles()
 	return err
 }
 
