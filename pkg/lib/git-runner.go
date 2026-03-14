@@ -27,12 +27,11 @@ func NewGitRunner(origin, path string, fetchInterval int) *GitRunner {
 	}
 }
 
-// Init checks, if the local repository exists, if not clones it.
-// If it does exist, it updates it.
+// Init checks if the local path is a valid git repository.
+// If not (missing, empty, or non-git directory), it clones fresh.
+// If it is, it pulls the latest changes.
 func (gr *GitRunner) Init() error {
-	// Try to open as a valid git repository
 	if _, err := git.PlainOpen(gr.LocalPath); err == nil {
-		// Repo exists and is valid — update it
 		Logger.Info("Update", "origin", gr.origin)
 		if err = gr.updateRepo(); err != nil {
 			return err
@@ -41,7 +40,6 @@ func (gr *GitRunner) Init() error {
 		return err
 	}
 
-	// Not a valid git repo (directory missing, empty, or corrupted) — clone fresh
 	Logger.Info("Cloning", "origin", gr.origin, "path", gr.LocalPath)
 
 	// Remove the path if it already exists (handles empty Docker volume mount)
