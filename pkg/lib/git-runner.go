@@ -42,8 +42,9 @@ func (gr *GitRunner) Init() error {
 
 	Logger.Info("Cloning", "origin", gr.origin, "path", gr.LocalPath)
 
-	// Remove the path if it already exists (handles empty Docker volume mount)
-	if _, statErr := os.Stat(gr.LocalPath); statErr == nil {
+	// Only remove if the directory exists and is non-empty (corrupted repo).
+	// Bind mount points exist but are empty — cloning into them works directly.
+	if entries, readErr := os.ReadDir(gr.LocalPath); readErr == nil && len(entries) > 0 {
 		if err := os.RemoveAll(gr.LocalPath); err != nil {
 			return fmt.Errorf("failed to remove non-repo directory: %w", err)
 		}
