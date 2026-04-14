@@ -30,3 +30,4 @@ store/
 .sisyphus/evidence/
 gitignore-server
 main
+/.sisyphus
