@@ -1,8 +1,8 @@
-# gitignore.lol 🚀
+# gitignore.lol
 
 > For devs who hate commit noise
 
-No redirects. No ads. Just clean, GitHub-powered templates.
+No ads. Just clean, GitHub-powered templates. Note: some legacy root-path requests are compatibly redirected to the canonical /api/* endpoints (see Compatibility note below).
 
 ## Overview
 
@@ -10,12 +10,11 @@ gitignore.lol is a modern, fast, and simple service for generating `.gitignore` 
 
 ## Features
 
-- 🔗 **No Redirects** - No weird rebranding and redirects. The base API URL stays the same.
-- 🚀 **Zero Fuss** - Quick and simple .gitignore generation powered by GitHub's official templates.
-- 💻 **Web or CLI** - Generate templates through the web interface or use the REST API - whatever fits your workflow best.
-- ⚡ **Fast & Reliable** - Built with Go for maximum performance and reliability.
-- 🔒 **Rate Limited** - Protected against abuse with configurable moving window rate limits optimized for efficiency.
-- 🌐 **CORS Enabled** - Ready for cross-origin requests.
+- **Zero Fuss** - Quick and simple .gitignore generation powered by GitHub's official templates.
+- **Web or CLI** - Generate templates through the web interface or use the REST API - whatever fits your workflow best.
+- **Fast & Reliable** - Built with Go for maximum performance and reliability.
+- **Rate Limited** - Protected against abuse with configurable moving window rate limits optimized for efficiency.
+- **CORS Enabled** - Ready for cross-origin requests.
 
 ## Quick Start
 
@@ -67,6 +66,10 @@ The API is documented using OpenAPI/Swagger. You can access the documentation at
 - `GET /api/list` - Get a list of all available templates
 - `GET /api/{templateList}` - Get combined .gitignore file for specified templates
   - Example: `/api/go,node,python`
+
+## Compatibility note
+
+For backwards compatibility some mistaken root-path requests are redirected to the canonical API. Example: a request to `/Python` may be redirected to `/api/Python`. The canonical, supported API endpoints remain under `/api/...` and should be used by clients.
 
 ## Development
 

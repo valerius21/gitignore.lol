@@ -61,9 +61,7 @@ func (gr *GitRunner) Init() error {
 }
 
 func (gr *GitRunner) updateRepo() error {
-	// update repo
-
-	repo, err := git.PlainOpen(gr.LocalPath)
+    repo, err := git.PlainOpen(gr.LocalPath)
 	if err != nil {
 		return err
 	}
@@ -78,8 +76,7 @@ func (gr *GitRunner) updateRepo() error {
 		return err
 	}
 
-	// log latest commit hash that was pulled
-	ref, err := repo.Head()
+    ref, err := repo.Head()
 	if err != nil {
 		return err
 	}

@@ -10,13 +10,13 @@ var CLI struct {
 	RateCleanupMs   int    `help:"Cleanup interval for rate limiter in milliseconds" name:"rate-cleanup" default:"30000"`
 	EnableRateLimit bool   `help:"Enable rate limiting" name:"enable-rate-limit" default:"true"`
 
-	// Enhanced rate limiting for scanner protection
-	UseEnhancedLimiter bool   `help:"Use enhanced rate limiter with scanner protection" name:"enhanced-limiter" default:"true"`
+    // Enhanced rate limiting for scanner protection
+    UseEnhancedLimiter bool   `help:"Use enhanced rate limiter with scanner protection" name:"enhanced-limiter" default:"true"`
 	ErrorRateLimit     int    `help:"Maximum 404/error requests per window per IP" name:"error-rate-limit" default:"10"`
 	BlockMinutes       int    `help:"Minutes to block IPs that exceed limits" name:"block-minutes" default:"5"`
 	MaxViolations      int    `help:"Max violations before longer blocks" name:"max-violations" default:"3"`
 	CorsOrigins        string `help:"Allowed CORS origins" name:"cors-origins" default:"*"`
 
-	// Stats endpoint security
-	EnableStats bool `help:"Enable /stats endpoint for rate limiter monitoring" name:"enable-stats" default:"false"`
+    // Stats endpoint security
+    EnableStats bool `help:"Enable /stats endpoint for rate limiter monitoring" name:"enable-stats" default:"false"`
 }

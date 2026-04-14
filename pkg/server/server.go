@@ -67,6 +67,30 @@ func newApp(gitRunner *lib.GitRunner, rateLimiter *lib.MovingWindowLimiter, enha
 		Browse: true,
 	}))
 
+	app.Get("/:template", func(c fiber.Ctx) error {
+		template := c.Params("template")
+
+		if template == "api" || template == "health" || template == "swagger" || template == "stats" {
+			return c.Next()
+		}
+
+		if strings.HasSuffix(c.Path(), "/") {
+			return c.Next()
+		}
+
+		eligible := isRootTemplateRedirectEligible(template, gitRunner)
+		if eligible {
+			location := "/api/" + template
+			queryString := c.Request().URI().QueryString()
+			if len(queryString) > 0 {
+				location = location + "?" + string(queryString)
+			}
+			return c.Redirect().Status(fiber.StatusTemporaryRedirect).To(location)
+		}
+
+		return c.Next()
+	})
+
 	// API routes with rate limiting
 	apiGroup.Get("/list", func(c fiber.Ctx) error {
 		return listTemplates(c, gitRunner)
@@ -109,6 +133,22 @@ func registerHealthRoute(app *fiber.App) {
 	app.Get("/health", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(HealthResponse{Status: "ok"})
 	})
+}
+
+// isRootTemplateRedirectEligible checks if a root path segment is a valid single template
+// that should be redirected to /api/<template>. Returns true only for valid templates
+// without commas (single-segment only), false otherwise.
+func isRootTemplateRedirectEligible(segment string, gitRunner *lib.GitRunner) bool {
+	if strings.Contains(segment, ",") {
+		return false
+	}
+
+	_, err := gitRunner.GetFileContents(segment)
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 // Run starts the HTTP server and returns the app for graceful shutdown

@@ -15,16 +15,14 @@ func EnhancedRateLimitMiddleware(limiter *EnhancedRateLimiter) fiber.Handler {
 		clientIP := c.IP()
 		path := c.Path()
 
-		// Pre-check: Block scanner paths immediately
-		if limiter.IsScannerPath(path) {
+        if limiter.IsScannerPath(path) {
 			Logger.Warn("Blocked scanner path", "ip", clientIP, "path", path)
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"error": "Not Found",
 			})
 		}
 
-		// Check rate limit for normal requests first
-		if !limiter.IsAllowed(clientIP, path, ResponseTypeNormal) {
+        if !limiter.IsAllowed(clientIP, path, ResponseTypeNormal) {
 			Logger.Warn("Rate limit exceeded", "ip", clientIP, "path", path)
 			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
 				"error":   "Too Many Requests",
@@ -32,8 +30,7 @@ func EnhancedRateLimitMiddleware(limiter *EnhancedRateLimiter) fiber.Handler {
 			})
 		}
 
-		// Continue with request processing
-		err := c.Next()
+        err := c.Next()
 
 		// After request processing, check response status for additional rate limiting
 		status := c.Response().StatusCode()
@@ -43,12 +40,11 @@ func EnhancedRateLimitMiddleware(limiter *EnhancedRateLimiter) fiber.Handler {
 				responseType = ResponseTypeError
 			}
 
-			// Check error-specific rate limits
-			if !limiter.IsAllowed(clientIP, path, responseType) {
-				Logger.Warn("Error rate limit exceeded", "ip", clientIP, "status", status)
-				// IP is now blocked, but we already processed the request
-				// Future requests will be blocked by the pre-check
-			}
+            if !limiter.IsAllowed(clientIP, path, responseType) {
+                Logger.Warn("Error rate limit exceeded", "ip", clientIP, "status", status)
+                // IP is now blocked, but we already processed the request
+                // Future requests will be blocked by the pre-check
+            }
 		}
 
 		return err
